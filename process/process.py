@@ -1,4 +1,5 @@
 from ast import operator
+from asyncio import tasks
 import pygame
 import random
 
@@ -20,17 +21,23 @@ class Process:
         tasks = list()
 
         for i in range(10):
-            num2 = random.randint(0, 10)
+            num2 = random.randint(1, 10)
             operator = random.choice(["+", "-", "*", "/"])
 
             if operator == "/":
-                num1 = num2 * random.randint(0, 10)
+                num1 = num2 * random.randint(1, 10)
             else:
-                num1 = random.randint(0, 10)
+                num1 = random.randint(1, 10)
 
             tasks.append(Task(num1, num2, operator))
 
-        return tasks
+        self.tasks = tasks
+        self.tasks_gui = list()
+
+        i = 0
+        for task in tasks:
+            self.tasks_gui.append(Text(str(task), (255, 255, 255), pos_x = 100 + (i // 5) * 300, pos_y=300+((i % 5) * 100)))
+            i += 1
 
     def stop(self):
         self.run = False
@@ -41,10 +48,14 @@ class Process:
 
     def draw(self):
         self.check_button.draw(self.window)
+        for task in self.tasks_gui:
+            task.draw(self.window)
 
 
     def start(self):
         self.run = True
+
+        self.prepare_tasks()
 
         while self.run:
             for event in pygame.event.get():
