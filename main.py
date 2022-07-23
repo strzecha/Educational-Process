@@ -1,4 +1,4 @@
-from process import Process
+from process.process import Process
 
 def main():
     proc = Process()
