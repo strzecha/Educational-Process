@@ -20,9 +20,13 @@ class Process:
         tasks = list()
 
         for i in range(10):
-            num1 = random.randint(0, 10)
             num2 = random.randint(0, 10)
             operator = random.choice(["+", "-", "*", "/"])
+
+            if operator == "/":
+                num1 = num2 * random.randint(0, 10)
+            else:
+                num1 = random.randint(0, 10)
 
             tasks.append(Task(num1, num2, operator))
 
