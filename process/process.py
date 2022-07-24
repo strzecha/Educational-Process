@@ -20,7 +20,15 @@ class Process:
         text = Text("Sprawdź", (0, 0, 0), pos_x = 400, pos_y=105, font_size=self.font_size)
 
         self.check_button = Button(0.2 * self.screen_width, 0.075 * self.screen_height, 0.4 * self.screen_width, 0.9 * self.screen_height, text, 
-                                    self.stop, color=(150, 150, 150), hover_color=(100, 100, 100))
+                                    self.check_answers, color=(150, 150, 150), hover_color=(100, 100, 100))
+
+        text = Text("Restart", (0, 0, 0), font_size=self.font_size)
+
+        self.next_button = Button(0.2 * self.screen_width, 0.075 * self.screen_height, 0.4 * self.screen_width, 0.8 * self.screen_height, text, 
+                                    self.restart, color=(150, 150, 150), hover_color=(100, 100, 100))
+
+        self.restart_state = False
+        self.ended = False
 
     def prepare_tasks(self):
         tasks = list()
@@ -52,13 +60,51 @@ class Process:
         self.run = False
 
     def update(self):
-        self.check_button.update()
+        if self.restart_state or self.ended:
+            self.next_button.update()
+        else:
+            self.check_button.update()
         for solution in self.solution_gui:
             solution.update()
+        for task in self.tasks_gui:
+            task.update()
         pygame.display.update()
 
+    def check_answers(self):
+        points = 0
+        for i in range(len(self.tasks)):
+            try:
+                answer = int(self.solution_gui[i].get_text())
+            except:
+                answer = None
+
+            if self.tasks[i].check(answer):
+                points += 1
+                self.solution_gui[i].set_background_color((22, 255, 18))
+            else:
+                self.solution_gui[i].set_background_color((252, 18, 18))
+
+            self.tasks_gui[i].set_text(str(self.tasks[i]) + str(self.tasks[i].solution)) 
+
+        if points < 9:
+            self.restart_state = True
+        else:
+            self.ended = True
+
+        self.update()
+
+    def restart(self):
+        if self.ended:
+            self.run = False
+        elif self.restart_state:
+            self.prepare_tasks()
+            self.restart_state = False    
+
     def draw(self):
-        self.check_button.draw(self.window)
+        if self.restart_state or self.ended:
+            self.next_button.draw(self.window)
+        else:
+            self.check_button.draw(self.window)
         for task in self.tasks_gui:
             task.draw(self.window)
         for solution in self.solution_gui:
@@ -79,7 +125,10 @@ class Process:
                     if event.key == pygame.K_ESCAPE:
                         self.stop()
 
-                self.check_button.handle_event(event)
+                if self.restart_state or self.ended:
+                    self.next_button.handle_event(event)
+                else:
+                    self.check_button.handle_event(event)
                 for solution in self.solution_gui:
                     solution.handle_event(event)
 

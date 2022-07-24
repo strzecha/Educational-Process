@@ -14,6 +14,7 @@ class Button():
         self.action = action
 
         self.set_text(text)
+        self.update()
 
     def set_text(self, text):
         self.text = text

@@ -6,7 +6,7 @@ class Task:
         self.number1 = number1
         self.number2 = number2
         self.operator = operator
-        self.solution = eval(str(number1)+operator+str(number2))
+        self.solution = int(eval(str(number1)+operator+str(number2)))
 
     def __str__(self):
         return "{} {} {} = ".format(self.number1, self.operator, self.number2)

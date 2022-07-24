@@ -10,10 +10,14 @@ class InputText():
         self.rect.y = pos_y
         self.active = False
 
+        self.bg_color = (210, 210, 210)
+        self.bg_color_active = (255, 255, 255)
+
         self.pos = (pos_x, pos_y)
 
         self.text = Text("", (0, 0, 0), font_size=font_size)
         self.set_text()
+        self.update()
 
     def set_text(self):
         text_width, text_height = self.text.text_rendered.get_size()
@@ -35,9 +39,9 @@ class InputText():
         self.mouse = pygame.mouse.get_pos()
 
         if self.active:
-            self.image.fill((255, 255, 255))
+            self.image.fill(self.bg_color_active)
         else:
-            self.image.fill((210, 210, 210))
+            self.image.fill(self.bg_color)
 
 
     def handle_event(self, event):
@@ -57,3 +61,6 @@ class InputText():
 
     def get_text(self):
         return self.text.text
+
+    def set_background_color(self, color):
+        self.bg_color = color

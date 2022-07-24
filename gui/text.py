@@ -19,3 +19,6 @@ class Text:
 
     def draw(self, screen):
         screen.blit(self.text_rendered, self.pos)
+
+    def set_text(self, text):
+        self.text = text
