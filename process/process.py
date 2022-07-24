@@ -39,6 +39,8 @@ class Process:
 
             if operator == "/":
                 num1 = num2 * random.randint(1, 10)
+            elif operator == "-":
+                num1 = random.randint(num2, 10)
             else:
                 num1 = random.randint(1, 10)
 
@@ -90,6 +92,8 @@ class Process:
             self.restart_state = True
         else:
             self.ended = True
+            text = Text("Wyjdź", (0, 0, 0), font_size=self.font_size)
+            self.next_button.set_text(text)
 
         self.update()
 
@@ -129,8 +133,9 @@ class Process:
                     self.next_button.handle_event(event)
                 else:
                     self.check_button.handle_event(event)
-                for solution in self.solution_gui:
-                    solution.handle_event(event)
+                    for solution in self.solution_gui:
+                        solution.handle_event(event)
+                
 
             self.window.fill(self.BGCOLOG)
             self.draw()
