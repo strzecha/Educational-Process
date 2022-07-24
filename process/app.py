@@ -1,8 +1,7 @@
 import pygame
-import random
 import os
 
-from process.task import Task
+from process.task_manager import TaskManager
 from gui.button import Button
 from gui.text import Text
 from gui.text_input import InputText
@@ -32,27 +31,12 @@ class App:
         self.ended = False
 
     def prepare_tasks(self):
-        tasks = list()
-
-        for i in range(10):
-            num2 = random.randint(1, 10)
-            operator = random.choice(["+", "-", "*", "/"])
-
-            if operator == "/":
-                num1 = num2 * random.randint(1, 10)
-            elif operator == "-":
-                num1 = random.randint(num2, 10)
-            else:
-                num1 = random.randint(1, 10)
-
-            tasks.append(Task(num1, num2, operator))
-
-        self.tasks = tasks
+        self.tasks = TaskManager().generate_tasks()
         self.tasks_gui = list()
         self.solution_gui = list()
 
         i = 0
-        for task in tasks:
+        for task in self.tasks:
             pos_x = 0.15 * self.screen_width + (i // 5) * 0.35 * self.screen_width
             pos_y = 0.2 * self.screen_height + ((i % 5)) * 0.12 * self.screen_height
             self.tasks_gui.append(Text(str(task), (0, 0, 0), pos_x=pos_x, pos_y=pos_y, font_size=self.font_size))
