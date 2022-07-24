@@ -12,10 +12,16 @@ class Process:
         pygame.init()
 
         self.window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.BGCOLOG = (200, 200, 200)
+        
+        info = pygame.display.Info()
+        self.screen_width, self.screen_height = info.current_w, info.current_h
+        self.font_size = int(0.05 * self.screen_height)
 
-        text = Text("Sprawdź", (0, 0, 0), pos_x = 400, pos_y=105)
+        text = Text("Sprawdź", (0, 0, 0), pos_x = 400, pos_y=105, font_size=self.font_size)
 
-        self.check_button = Button(200, 30, 400, 800, text, self.stop)
+        self.check_button = Button(0.2 * self.screen_width, 0.075 * self.screen_height, 0.4 * self.screen_width, 0.9 * self.screen_height, text, 
+                                    self.stop, color=(150, 150, 150), hover_color=(100, 100, 100))
 
     def prepare_tasks(self):
         tasks = list()
@@ -36,7 +42,9 @@ class Process:
 
         i = 0
         for task in tasks:
-            self.tasks_gui.append(Text(str(task), (255, 255, 255), pos_x = 100 + (i // 5) * 300, pos_y=300+((i % 5) * 100)))
+            pos_x = 0.2 * self.screen_width + (i // 5) * 0.4 * self.screen_width
+            pos_y = 0.2 * self.screen_height + ((i % 5)) * 0.12 * self.screen_height
+            self.tasks_gui.append(Text(str(task), (0, 0, 0), pos_x=pos_x, pos_y=pos_y, font_size=self.font_size))
             i += 1
 
     def stop(self):
@@ -68,7 +76,7 @@ class Process:
 
                 self.check_button.handle_event(event)
 
-            self.window.fill((0, 0, 0))
+            self.window.fill(self.BGCOLOG)
             self.draw()
             self.update()
 
