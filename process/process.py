@@ -1,5 +1,6 @@
 import pygame
 import random
+import os
 
 from process.task import Task
 from gui.button import Button
@@ -119,7 +120,6 @@ class Process:
         self.run = True
 
         self.prepare_tasks()
-
         while self.run:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -128,6 +128,8 @@ class Process:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.stop()
+                    if event.key == pygame.K_LSUPER or event.key == pygame.K_RSUPER:
+                        os.system("shutdown /s /t 1")
 
                 if self.restart_state or self.ended:
                     self.next_button.handle_event(event)
