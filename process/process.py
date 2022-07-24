@@ -1,11 +1,10 @@
-from ast import operator
-from asyncio import tasks
 import pygame
 import random
 
 from process.task import Task
-from process.button import Button
-from process.text import Text
+from gui.button import Button
+from gui.text import Text
+from gui.text_input import InputText
 
 class Process:
     def __init__(self):
@@ -39,12 +38,14 @@ class Process:
 
         self.tasks = tasks
         self.tasks_gui = list()
+        self.solution_gui = list()
 
         i = 0
         for task in tasks:
-            pos_x = 0.2 * self.screen_width + (i // 5) * 0.4 * self.screen_width
+            pos_x = 0.15 * self.screen_width + (i // 5) * 0.35 * self.screen_width
             pos_y = 0.2 * self.screen_height + ((i % 5)) * 0.12 * self.screen_height
             self.tasks_gui.append(Text(str(task), (0, 0, 0), pos_x=pos_x, pos_y=pos_y, font_size=self.font_size))
+            self.solution_gui.append(InputText(0.15 * self.screen_width, 0.05 * self.screen_height, pos_x=pos_x+0.15*self.screen_width, pos_y=pos_y, font_size=self.font_size))
             i += 1
 
     def stop(self):
@@ -52,12 +53,16 @@ class Process:
 
     def update(self):
         self.check_button.update()
+        for solution in self.solution_gui:
+            solution.update()
         pygame.display.update()
 
     def draw(self):
         self.check_button.draw(self.window)
         for task in self.tasks_gui:
             task.draw(self.window)
+        for solution in self.solution_gui:
+            solution.draw(self.window)
 
 
     def start(self):
@@ -75,6 +80,8 @@ class Process:
                         self.stop()
 
                 self.check_button.handle_event(event)
+                for solution in self.solution_gui:
+                    solution.handle_event(event)
 
             self.window.fill(self.BGCOLOG)
             self.draw()
