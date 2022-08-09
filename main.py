@@ -1,9 +1,10 @@
-from process.process import Process
-from process.app import App
+from process import Process
+from app import App
 
 def main():
     #proc = Process()
     #proc.start()
+
     app = App()
     app.start()
 

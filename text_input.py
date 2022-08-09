@@ -1,6 +1,6 @@
 import pygame
 
-from gui.text import Text
+from text import Text
 
 class InputText():
     def __init__(self, width, height, pos_x, pos_y, font_size):

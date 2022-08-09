@@ -1,12 +1,10 @@
 import time
 
-from process.app import App
+from app import App
 
 class Process:
     def start(self):
         while True:
-            time.sleep(60)
-
             app = App()
-
             app.start()
+            time.sleep(60)
