@@ -2,6 +2,7 @@ import random
 
 from task import MathTask, ForeignLanguageTask
 from data_reader import get_properties
+from database import select_all_data, create_connection
 
 properties = get_properties()
 
@@ -13,63 +14,7 @@ SUB_RANGE = list(int(num) for num in properties.get("SUB_RANGE").data.split(",")
 MUL_RANGE = list(int(num) for num in properties.get("MUL_RANGE").data.split(","))
 DIV_RANGE = list(int(num) for num in properties.get("DIV_RANGE").data.split(","))
 
-FOREING_WORDS = {
-    "kotwica": "anchor",
-    "pies": "dog",
-    "kot": "cat",
-    "kropla": "drop",
-    "pytanie": "question",
-    "wykrzyknienie": "exclamation",
-    "cel": "target",
-    "znak": "sign",
-    "ogień": "fire",
-    "słońce": "sun",
-    "księżyc": "moon",
-    "kaktus": "cactus",
-    "igloo": "igloo",
-    "ptak": "bird",
-    "kłódka": "padlock",
-    "ołówek": "pencil",
-    "wargi": "lips",
-    "czaszka": "skull",
-    "żarówka": "light bulb",
-    "ser": "cheese",
-    "pająk": "spider",
-    "pajęczyna": "spider's web",
-    "kostka lodu": "ice cube",
-    "zielony": "green", 
-    "drzewo": "tree", 
-    "marchewka": "carrot",
-    "serce": "heart",
-    "klaun": "clown",
-    "zebra": "zebra",
-    "dinozaur": "dinosaur",
-    "żółw": "turtle",
-    "klucz wiolinowy": "clef",
-    "klucz": "key",
-    "zegar": "clock",
-    "samochód": "car",
-    "człowiek": "person",
-    "delfin": "dolphin",
-    "śnieżynka": "snowflake",
-    "bałwan": "snowman",
-    "jabłko": "apple",
-    "duch": "ghost",
-    "okulary": "glasses",
-    "smok": "dragon",
-    "oko": "eye",
-    "nożyczki": "scissors",
-    "bomba": "bomb",
-    "biedronka": "ladybug",
-    "piorun": "bolt",
-    "liść": "leaf",
-    "butelka": "bottle",
-    "świeca": "candle",
-    "młotek": "hammer",
-    "kwiat": "flower",
-    "koniczyna": "clover",
-    "koń": "horse"
-}
+LANGUAGE_TASKS_TABLE_NAME = properties.get("LANGUAGE_TASKS_TABLE_NAME").data
 
 class TaskManager:
     def __init__(self):
@@ -78,10 +23,18 @@ class TaskManager:
         self.mul_range = MUL_RANGE
         self.div_range = DIV_RANGE
 
+        self.language_tasks = None
+
     def generate_tasks(self):
         tasks = list()
         self.num = random.randint(0, 1)
 
+        if self.num == 1: # language tasks
+            connection = create_connection()
+            if connection:
+                self.language_tasks = select_all_data(connection, LANGUAGE_TASKS_TABLE_NAME)
+                connection.close()
+                
         for _ in range(NUM_TASKS):
             if self.num == 0:
                 task = self.generate_math_task()
@@ -115,7 +68,6 @@ class TaskManager:
         return MathTask(num1, num2, operator)
 
     def generate_foreign_language_task(self):
-        word = random.choice(list(FOREING_WORDS.keys()))
-        translation = FOREING_WORDS[word]
+        _, word, translation = random.choice(self.language_tasks)
 
         return ForeignLanguageTask(word, translation)
