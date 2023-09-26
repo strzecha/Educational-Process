@@ -1,6 +1,6 @@
-from process import Process
-from app import App
-from data_reader import get_properties
+from application.process import Process
+from application.app import App
+from utils.data_reader import get_properties
 
 properties = get_properties()
 

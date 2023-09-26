@@ -1,8 +1,8 @@
 import random
 
-from task import MathTask, ForeignLanguageTask
-from data_reader import get_properties
-from database import select_all_data, create_connection
+from application.task import MathTask, ForeignLanguageTask
+from utils.data_reader import get_properties
+from utils.database import select_all_data, create_connection
 
 properties = get_properties()
 

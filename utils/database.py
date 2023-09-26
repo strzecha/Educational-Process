@@ -1,7 +1,7 @@
 import sqlite3
 from sqlite3 import Error
 
-from data_reader import get_properties
+from utils.data_reader import get_properties
 
 properties = get_properties()
 

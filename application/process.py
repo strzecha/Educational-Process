@@ -1,7 +1,7 @@
 import time
 
-from app import App
-from data_reader import get_properties
+from application.app import App
+from utils.data_reader import get_properties
 
 properties = get_properties()
 

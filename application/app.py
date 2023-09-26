@@ -1,11 +1,11 @@
 import pygame
 import os
-from task import Task
 
-from task_manager import TaskManager
-from button import Button
-from text import Text
-from text_input import InputText
+from application.task import Task
+from application.task_manager import TaskManager
+from gui.button import Button
+from gui.text import Text
+from gui.text_input import InputText
 
 class App:
     def __init__(self):

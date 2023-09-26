@@ -1,5 +1,5 @@
-from database import create_connection, create_language_task_table, insert_language_task, select_all_data
-from data_reader import get_properties
+from utils.database import create_connection, create_language_task_table, insert_language_task, select_all_data
+from utils.data_reader import get_properties
 
 if __name__ == "__main__":
 
