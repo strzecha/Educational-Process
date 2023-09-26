@@ -1,4 +1,5 @@
 import random
+import numpy.random as nprand
 
 from application.task import Task
 from utils.data_reader import get_properties
@@ -24,6 +25,7 @@ class TaskManager:
         self.div_range = DIV_RANGE
 
         self.language_tasks = None
+        self.number_of_tasks = NUM_TASKS
 
     def generate_tasks(self):
         tasks = list()
@@ -37,42 +39,48 @@ class TaskManager:
                 self.language_tasks = select_all_data(connection, LANGUAGE_TASKS_TABLE_NAME)
             connection.close()
                 
-        for _ in range(NUM_TASKS):
-            if self.num == 0:
-                task = self.generate_math_task()
-            elif self.num == 1:
-                task = self.generate_foreign_language_task()
 
-            tasks.append(task)
+        if self.num == 0:
+            tasks = self.generate_math_tasks()
+        elif self.num == 1:
+            tasks = self.generate_foreign_language_tasks()
 
         return tasks
 
     def get_num(self):
         return self.num
 
-    def generate_math_task(self):
-        operator_id, operator, occurs_num, correct_num = random.choice(self.math_tasks)
+    def generate_math_tasks(self):
+        tasks = list()
+        for i in range(self.number_of_tasks):
+            operator_id, operator, occurs_num, correct_num = random.choice(self.math_tasks)
 
-        if operator == "+":
-            num1 = random.randint(*self.add_range)
-            num2 = random.randint(*self.add_range)
-        elif operator == "-":
-            num1 = random.randint(*self.sub_range)
-            num2 = random.randint(self.sub_range[0], num1)
-        elif operator == "*":
-            num1 = random.randint(*self.mul_range)
-            num2 = random.randint(*self.mul_range)
-        elif operator == "/":
-            num2 = random.randint(*self.div_range)
-            num2 = max(num2, 1)
-            num1 = random.randint(*self.div_range) * num2
-        
-        question = f"{num1} {operator} {num2}"
-        solution = int(eval(question))
-        
-        return Task(operator_id, question, solution, occurs_num, correct_num)
+            if operator == "+":
+                num1 = random.randint(*self.add_range)
+                num2 = random.randint(*self.add_range)
+            elif operator == "-":
+                num1 = random.randint(*self.sub_range)
+                num2 = random.randint(self.sub_range[0], num1)
+            elif operator == "*":
+                num1 = random.randint(*self.mul_range)
+                num2 = random.randint(*self.mul_range)
+            elif operator == "/":
+                num2 = random.randint(*self.div_range)
+                num2 = max(num2, 1)
+                num1 = random.randint(*self.div_range) * num2
+            
+            question = f"{num1} {operator} {num2}"
+            solution = int(eval(question))
 
-    def generate_foreign_language_task(self):
-        id, word, translation, occurs_num, correct_num = random.choice(self.language_tasks)
+            tasks.append(Task(operator_id, question, solution, occurs_num, correct_num))
 
-        return Task(id, word, translation, occurs_num, correct_num)
+        return tasks
+
+    def generate_foreign_language_tasks(self):
+        tasks_id = nprand.choice(range(len(self.language_tasks)), size=self.number_of_tasks, replace=False)
+
+        tasks = list()
+        for id in tasks_id:
+            tasks.append(Task(*self.language_tasks[id]))
+
+        return tasks
