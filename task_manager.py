@@ -1,9 +1,17 @@
 import random
 
 from task import MathTask, ForeignLanguageTask
+from data_reader import get_properties
 
-OPERATORS = ["+", "-", "*", "/"]
-NUM_TASKS = 10
+properties = get_properties()
+
+OPERATORS = properties.get("MATH_OPERATORS").data.split(",")
+NUM_TASKS = int(properties.get("NUM_TASKS").data)
+
+ADD_RANGE = list(int(num) for num in properties.get("ADD_RANGE").data.split(","))
+SUB_RANGE = list(int(num) for num in properties.get("SUB_RANGE").data.split(","))
+MUL_RANGE = list(int(num) for num in properties.get("MUL_RANGE").data.split(","))
+DIV_RANGE = list(int(num) for num in properties.get("DIV_RANGE").data.split(","))
 
 FOREING_WORDS = {
     "kotwica": "anchor",
@@ -64,6 +72,12 @@ FOREING_WORDS = {
 }
 
 class TaskManager:
+    def __init__(self):
+        self.add_range = ADD_RANGE
+        self.sub_range = SUB_RANGE
+        self.mul_range = MUL_RANGE
+        self.div_range = DIV_RANGE
+
     def generate_tasks(self):
         tasks = list()
         self.num = random.randint(0, 1)
@@ -85,17 +99,18 @@ class TaskManager:
         operator = random.choice(OPERATORS)
 
         if operator == "+":
-            num1 = random.randint(0, 100)
-            num2 = random.randint(0, 100 - num1)
+            num1 = random.randint(*self.add_range)
+            num2 = random.randint(*self.add_range)
         elif operator == "-":
-            num1 = random.randint(0, 100)
-            num2 = random.randint(0, num1)
+            num1 = random.randint(*self.sub_range)
+            num2 = random.randint(self.sub_range[0], num1)
         elif operator == "*":
-            num1 = random.randint(0, 10)
-            num2 = random.randint(0, 10)
+            num1 = random.randint(*self.mul_range)
+            num2 = random.randint(*self.mul_range)
         elif operator == "/":
-            num2 = random.randint(1, 10)
-            num1 = random.randint(0, 10) * num2
+            num2 = random.randint(*self.div_range)
+            num2 = max(num2, 1)
+            num1 = random.randint(*self.div_range) * num2
 
         return MathTask(num1, num2, operator)
 
