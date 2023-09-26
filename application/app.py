@@ -6,6 +6,7 @@ from application.task_manager import TaskManager
 from gui.button import Button
 from gui.text import Text
 from gui.text_input import InputText
+from utils.database import update_language_task, update_math_task, create_connection
 
 class App:
     def __init__(self):
@@ -34,12 +35,12 @@ class App:
     def prepare_tasks(self):
         manager = TaskManager()
         self.tasks = manager.generate_tasks()
-        num = manager.get_num()
+        self.num = manager.get_num()
 
         self.tasks_gui = list()
         self.solution_gui = list()
 
-        if num == 0:
+        if self.num == 0:
             i = 0
             for task in self.tasks:
                 pos_x = 0.15 * self.screen_width + (i // 5) * 0.35 * self.screen_width
@@ -48,7 +49,7 @@ class App:
                 self.solution_gui.append(InputText(0.10 * self.screen_width, 0.05 * self.screen_height, pos_x=pos_x+0.20*self.screen_width, pos_y=pos_y, font_size=self.font_size))
                 i += 1
 
-        elif num == 1:
+        elif self.num == 1:
             i = 0
             for task in self.tasks:
                 pos_x = 0.2 * self.screen_width
@@ -56,10 +57,6 @@ class App:
                 self.tasks_gui.append(Text(str(task), (0, 0, 0), pos_x=pos_x, pos_y=pos_y, font_size=self.font_size))
                 self.solution_gui.append(InputText(0.2 * self.screen_width, 0.05 * self.screen_height, pos_x=pos_x+0.4*self.screen_width, pos_y=pos_y, font_size=self.font_size))
                 i += 1
-
-        
-
-        
 
     def stop(self):
         self.run = False
@@ -77,17 +74,25 @@ class App:
 
     def check_answers(self):
         points = 0
+        connection = create_connection() 
         for i in range(len(self.tasks)):
             answer = self.solution_gui[i].get_text()
-
+            correct = 0
             if self.tasks[i].check(answer):
                 points += 1
+                correct = 1
                 self.solution_gui[i].set_background_color((22, 255, 18))
             else:
                 self.solution_gui[i].set_background_color((252, 18, 18))
 
-            self.tasks_gui[i].set_text(str(self.tasks[i]) + str(self.tasks[i].solution)) 
+            if self.num == 0: # math tasks
+                update_math_task(connection, self.tasks[i].id, correct)
+            if self.num == 1: # language tasks
+                update_language_task(connection, self.tasks[i].id, correct)
 
+
+            self.tasks_gui[i].set_text(str(self.tasks[i]) + str(self.tasks[i].solution)) 
+        connection.close()
         if points < 9:
             self.restart_state = True
         else:

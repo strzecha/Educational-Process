@@ -1,4 +1,6 @@
-from utils.database import create_connection, create_language_task_table, insert_language_task, select_all_data
+from utils.database import (create_connection, create_language_task_table, 
+                            insert_language_task, select_all_data,
+                            create_math_task_table, insert_math_task)
 from utils.data_reader import get_properties
 
 if __name__ == "__main__":
@@ -7,7 +9,9 @@ if __name__ == "__main__":
     connection = create_connection()
 
     LANGUAGE_TASKS_TABLE_NAME = properties.get("LANGUAGE_TASKS_TABLE_NAME").data
+    MATH_TASKS_TABLE_NAME = properties.get("MATH_TASKS_TABLE_NAME").data
 
+    OPERATORS = properties.get("MATH_OPERATORS").data.split(",")
     FOREING_WORDS = {
         "kotwica": "anchor",
         "pies": "dog",
@@ -71,5 +75,15 @@ if __name__ == "__main__":
 
         for key in FOREING_WORDS.keys():
             id = insert_language_task(connection, [key, FOREING_WORDS[key]])
-        select_all_data(connection, LANGUAGE_TASKS_TABLE_NAME)
+        rows = select_all_data(connection, LANGUAGE_TASKS_TABLE_NAME)
+        for row in rows:
+            print(row)
+        
+        create_math_task_table(connection)
+        for operator in OPERATORS:
+            id = insert_math_task(connection, operator)
+        rows = select_all_data(connection, MATH_TASKS_TABLE_NAME)
+        for row in rows:
+            print(row)
+
         connection.close()
