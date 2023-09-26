@@ -90,8 +90,8 @@ class App:
             if self.num == 1: # language tasks
                 update_language_task(connection, self.tasks[i].id, correct)
 
-
-            self.tasks_gui[i].set_text(str(self.tasks[i]) + str(self.tasks[i].solution)) 
+            self.tasks[i].solve()
+            self.tasks_gui[i].set_text(str(self.tasks[i])) 
         connection.close()
         if points < 9:
             self.restart_state = True

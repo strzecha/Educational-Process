@@ -1,6 +1,6 @@
 import random
 
-from application.task import MathTask, ForeignLanguageTask
+from application.task import Task
 from utils.data_reader import get_properties
 from utils.database import select_all_data, create_connection
 
@@ -66,10 +66,13 @@ class TaskManager:
             num2 = random.randint(*self.div_range)
             num2 = max(num2, 1)
             num1 = random.randint(*self.div_range) * num2
-
-        return MathTask(operator_id, num1, num2, operator, occurs_num, correct_num)
+        
+        question = f"{num1} {operator} {num2}"
+        solution = int(eval(question))
+        
+        return Task(operator_id, question, solution, occurs_num, correct_num)
 
     def generate_foreign_language_task(self):
         id, word, translation, occurs_num, correct_num = random.choice(self.language_tasks)
 
-        return ForeignLanguageTask(id, word, translation, occurs_num, correct_num)
+        return Task(id, word, translation, occurs_num, correct_num)
