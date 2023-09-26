@@ -9,11 +9,11 @@ DB_FILE = properties.get("TASKS_DB_NAME").data
 LANGUAGE_TASKS_TABLE_NAME = properties.get("LANGUAGE_TASKS_TABLE_NAME").data
 MATH_TASKS_TABLE_NAME = properties.get("MATH_TASKS_TABLE_NAME").data
 
-def create_connection():
+def create_connection(db_file=DB_FILE):
     """ create a database connection to a SQLite database """
     connection = None
     try:
-        connection = sqlite3.connect(DB_FILE)
+        connection = sqlite3.connect(db_file)
     except Error as e:
         print(e)
 
@@ -93,6 +93,20 @@ def insert_math_task(connection, data):
 def select_data_by_id(connection, table_name, id):
     cur = connection.cursor()
     cur.execute(f"SELECT * FROM {table_name} WHERE id = {id}")
+
+    row = cur.fetchone()
+
+    return row
+
+def get_number_of_tables(connection):
+    sql = """
+        SELECT count(*) 
+        FROM sqlite_master 
+        WHERE type = 'table' AND name != 'android_metadata' AND name != 'sqlite_sequence'
+    """
+
+    cur = connection.cursor()
+    cur.execute(sql)
 
     row = cur.fetchone()
 

@@ -9,5 +9,6 @@ MATH_OPERATORS=+,-,*,/
 NUM_TASKS=10
 
 TASKS_DB_NAME=tasks.db
+TASKS_DB_TEST_NAME=test_tasks.db
 LANGUAGE_TASKS_TABLE_NAME=language_tasks
 MATH_TASKS_TABLE_NAME=math_tasks
