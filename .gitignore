@@ -4,3 +4,5 @@
 utils/email_sender.py
 gmail_pass.txt
 tasks.db
+credentials
+tester.py

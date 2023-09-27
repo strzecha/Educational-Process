@@ -1,0 +1,4 @@
+EMAIL_SENDER=app@gmail.com
+EMAIL_PASSWORD=xxxx yyyy zzzz rrrr
+EMAIL_RECEIVER=test@gmail.com
+USERNAME=Bob
