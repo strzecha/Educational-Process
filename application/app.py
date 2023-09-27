@@ -1,5 +1,6 @@
 import pygame
 import os
+import datetime
 
 from application.task_manager import TaskManager
 from gui.button import Button
@@ -16,6 +17,7 @@ properties = get_properties()
 
 LANGUAGE_TASKS_TABLE_NAME = properties.get("LANGUAGE_TASKS_TABLE_NAME").data
 MATH_TASKS_TABLE_NAME = properties.get("MATH_TASKS_TABLE_NAME").data
+THRESHOLD = int(properties.get("THRESHOLD").data)
 
 class App:
     def __init__(self):
@@ -41,6 +43,7 @@ class App:
         self.restart_state = False
         self.ended = False
         self.connection = create_connection() 
+        self.threshold = THRESHOLD
 
     def prepare_tasks(self):
         manager = TaskManager()
@@ -101,7 +104,7 @@ class App:
 
             self.tasks[i].solve()
             self.tasks_gui[i].set_text(str(self.tasks[i])) 
-        if points < 9:
+        if points < self.threshold:
             self.restart_state = True
         else:
             self.ended = True
@@ -155,7 +158,13 @@ class App:
             self.update()
 
         pygame.quit()
-        self.send_email()
+        current_date = datetime.datetime.now()
+        if current_date.weekday() == 6 and not self.check_if_sent_sunday(): # sunday
+            self.send_email()
+            open("sunday", "w")
+        elif current_date.weekday() != 6 and self.check_if_sent_sunday():
+            os.remove("sunday")
+
         self.connection.close()
 
     def count_accuracy(self):        
@@ -165,9 +174,12 @@ class App:
         self.total_occurs_language = count_total_occurs(self.connection, LANGUAGE_TASKS_TABLE_NAME)
         self.total_correct_language = count_total_correct(self.connection, LANGUAGE_TASKS_TABLE_NAME)
 
-        self.math_total_accuracy = round(self.total_correct_math / self.total_occurs_math, 2) if self.total_occurs_math > 0 else 0
-        self.language_total_accuracy = round(self.total_correct_language / self.total_occurs_language, 2) if self.total_correct_language > 0 else 0
+        self.math_total_accuracy = round(self.total_correct_math / self.total_occurs_math, 4) if self.total_occurs_math > 0 else 0
+        self.language_total_accuracy = round(self.total_correct_language / self.total_occurs_language, 4) if self.total_correct_language > 0 else 0
     
+    def check_if_sent_sunday(self):
+        return os.path.exists("sunday")
+
     def send_email(self):
         self.count_accuracy()
 
