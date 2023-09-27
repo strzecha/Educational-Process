@@ -58,7 +58,7 @@ def update_language_task(connection, id, correct):
                   correct_number = ?
               WHERE id = {id}'''
     data = [row[3] + 1, row[4] + correct]
-    
+
     do_query(connection, sql, data)
 
 def update_math_task(connection, id, correct):
