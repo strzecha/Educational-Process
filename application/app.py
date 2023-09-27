@@ -15,6 +15,8 @@ from utils.mail_sender import MailSender
 
 properties = get_properties()
 
+DB_FILE = properties.get("TASKS_DB_NAME").data
+WEEK_DB_FILE = properties.get("TASKS_WEEK_DB_NAME").data
 LANGUAGE_TASKS_TABLE_NAME = properties.get("LANGUAGE_TASKS_TABLE_NAME").data
 MATH_TASKS_TABLE_NAME = properties.get("MATH_TASKS_TABLE_NAME").data
 THRESHOLD = int(properties.get("THRESHOLD").data)
@@ -42,7 +44,8 @@ class App:
 
         self.restart_state = False
         self.ended = False
-        self.connection = create_connection() 
+        self.connection_main_db = create_connection(DB_FILE)
+        self.connection_weekly_db = create_connection(WEEK_DB_FILE) 
         self.threshold = THRESHOLD
 
     def prepare_tasks(self):
@@ -98,9 +101,11 @@ class App:
                 self.solution_gui[i].set_background_color((252, 18, 18))
 
             if self.num == 0: # math tasks
-                update_math_task(self.connection, self.tasks[i].id, correct)
+                update_math_task(self.connection_main_db, self.tasks[i].id, correct)
+                update_math_task(self.connection_weekly_db, self.tasks[i].id, correct)
             if self.num == 1: # language tasks
-                update_language_task(self.connection, self.tasks[i].id, correct)
+                update_language_task(self.connection_main_db, self.tasks[i].id, correct)
+                update_language_task(self.connection_weekly_db, self.tasks[i].id, correct)
 
             self.tasks[i].solve()
             self.tasks_gui[i].set_text(str(self.tasks[i])) 
@@ -165,27 +170,44 @@ class App:
         elif current_date.weekday() != 6 and self.check_if_sent_sunday():
             os.remove("sunday")
 
-        self.connection.close()
+        self.connection_main_db.close()
 
-    def count_accuracy(self):        
-        self.total_occurs_math = count_total_occurs(self.connection, MATH_TASKS_TABLE_NAME)
-        self.total_correct_math = count_total_correct(self.connection, MATH_TASKS_TABLE_NAME)
+    def calculate_accuracy(self, connection):        
+        math_occurs_total = count_total_occurs(connection, MATH_TASKS_TABLE_NAME)
+        math_correct_total = count_total_correct(connection, MATH_TASKS_TABLE_NAME)
 
-        self.total_occurs_language = count_total_occurs(self.connection, LANGUAGE_TASKS_TABLE_NAME)
-        self.total_correct_language = count_total_correct(self.connection, LANGUAGE_TASKS_TABLE_NAME)
+        language_occurs_total = count_total_occurs(connection, LANGUAGE_TASKS_TABLE_NAME)
+        language_correct_total = count_total_correct(connection, LANGUAGE_TASKS_TABLE_NAME)
 
-        self.math_total_accuracy = round(self.total_correct_math / self.total_occurs_math, 4) if self.total_occurs_math > 0 else 0
-        self.language_total_accuracy = round(self.total_correct_language / self.total_occurs_language, 4) if self.total_correct_language > 0 else 0
+        math_accuracy_total = round(math_correct_total / math_occurs_total, 4) if math_occurs_total > 0 else 0
+        language_accuracy_total = round(language_correct_total / language_occurs_total, 4) if language_correct_total > 0 else 0
+    
+        return (math_occurs_total, math_correct_total, math_accuracy_total, 
+                language_occurs_total, language_correct_total, language_accuracy_total)
+    
+    def calculate_total_accuracy(self):
+        (
+            self.math_occurs_total, self.math_correct_total, self.math_accuracy_total, 
+            self.language_occurs_total, self.language_correct_total, self.language_accuracy_total
+        ) = self.calculate_accuracy(self.connection_main_db)
+        (
+            self.math_occurs_week, self.math_correct_week, self.math_week_accuracy, 
+            self.language_occurs_week, self.language_correct_week, self.language_week_accuracy
+        ) = self.calculate_accuracy(self.connection_weekly_db)
     
     def check_if_sent_sunday(self):
         return os.path.exists("sunday")
 
     def send_email(self):
-        self.count_accuracy()
+        self.calculate_accuracy()
 
         message = f"""
-            Skuteczność w zadaniach z matematyki: {self.total_correct_math}/{self.total_occurs_math} ({self.math_total_accuracy * 100}%)
-            Skuteczność w zadaniach z języka angielskiego: {self.total_correct_language}/{self.total_occurs_language} ({self.language_total_accuracy * 100}%)
+            Tygodniowe podsumowanie:
+            Skuteczność w zadaniach z matematyki: {self.math_correct_week}/{self.math_occurs_week} ({self.math_accuracy_total * 100}%)
+            Skuteczność w zadaniach z języka angielskiego: {self.language_correct_week}/{self.language_occurs_week} ({self.language_accuracy_total * 100}%)
+            Całkowite podsumowanie:
+            Skuteczność w zadaniach z matematyki: {self.math_correct_total}/{self.math_occurs_total} ({self.math_accuracy_total * 100}%)
+            Skuteczność w zadaniach z języka angielskiego: {self.language_correct_total}/{self.language_occurs_total} ({self.language_accuracy_total * 100}%)
             """
         
         ms = MailSender()
