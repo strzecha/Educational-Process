@@ -57,10 +57,9 @@ def update_language_task(connection, id, correct):
               SET occurs_number = ? ,
                   correct_number = ?
               WHERE id = {id}'''
+    data = [row[3] + 1, row[4] + correct]
     
-    cur = connection.cursor()
-    cur.execute(sql, [row[3] + 1, row[4] + correct])
-    connection.commit()
+    do_query(connection, sql, data)
 
 def update_math_task(connection, id, correct):
     row = select_data_by_id(connection, MATH_TASKS_TABLE_NAME, id)
@@ -69,34 +68,42 @@ def update_math_task(connection, id, correct):
               SET occurs_number = ? ,
                   correct_number = ?
               WHERE id = {id}'''
-    
+    data = [row[2] + 1, row[3] + correct]
+
+    do_query(connection, sql, data)
+
+def do_query(connection, sql, data):
     cur = connection.cursor()
-    cur.execute(sql, [row[2] + 1, row[3] + correct])
+    cur.execute(sql, data)
     connection.commit()
+
+    return cur.lastrowid
+
+def get_rows(connection, sql):
+    cur = connection.cursor()
+    cur.execute(sql)
+    rows = cur.fetchall()
+
+    return rows
 
 def insert_language_task(connection, data):
     sql = f"INSERT INTO {LANGUAGE_TASKS_TABLE_NAME}(word, translation) VALUES(?,?)"
-    cur = connection.cursor()
-    cur.execute(sql, data)
-    connection.commit()
-
-    return cur.lastrowid
+    
+    last_id = do_query(connection, sql, data)
+    return last_id
 
 def insert_math_task(connection, data):
     sql = f"INSERT INTO {MATH_TASKS_TABLE_NAME}(operator) VALUES(?)"
-    cur = connection.cursor()
-    cur.execute(sql, data)
-    connection.commit()
 
-    return cur.lastrowid
+    last_id = do_query(connection, sql, data)
+    return last_id
 
 def select_data_by_id(connection, table_name, id):
-    cur = connection.cursor()
-    cur.execute(f"SELECT * FROM {table_name} WHERE id = {id}")
+    sql = f"SELECT * FROM {table_name} WHERE id = {id}"
 
-    row = cur.fetchone()
+    rows = get_rows(connection, sql)
 
-    return row
+    return rows[0]
 
 def get_number_of_tables(connection):
     sql = """
@@ -105,17 +112,13 @@ def get_number_of_tables(connection):
         WHERE type = 'table' AND name != 'android_metadata' AND name != 'sqlite_sequence'
     """
 
-    cur = connection.cursor()
-    cur.execute(sql)
+    rows = get_rows(connection, sql)
 
-    row = cur.fetchone()
-
-    return row
+    return rows[0]
 
 def select_all_data(connection, table_name):
-    cur = connection.cursor()
-    cur.execute(f"SELECT * FROM {table_name}")
+    sql = f"SELECT * FROM {table_name}"
 
-    rows = cur.fetchall()
+    rows = get_rows(connection, sql)
 
     return rows
