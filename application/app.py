@@ -1,7 +1,6 @@
 import pygame
 import os
 
-from application.task import Task
 from application.task_manager import TaskManager
 from gui.button import Button
 from gui.text import Text

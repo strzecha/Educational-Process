@@ -17,7 +17,8 @@ MATH_TASKS_TABLE_NAME = properties.get("MATH_TASKS_TABLE_NAME").data
 def connect():
     connection = create_connection(DB_TEST_FILE)
     yield locals()
-
+    
+    # close and remove database after all tests
     connection.close()  
     os.remove(DB_TEST_FILE)
 
