@@ -5,7 +5,17 @@ from application.task_manager import TaskManager
 from gui.button import Button
 from gui.text import Text
 from gui.text_input import InputText
-from utils.database import update_language_task, update_math_task, create_connection
+from utils.database import (
+    update_language_task, update_math_task, create_connection,
+    count_total_occurs, count_total_correct
+)
+from utils.data_reader import get_properties
+from utils.mail_sender import MailSender
+
+properties = get_properties()
+
+LANGUAGE_TASKS_TABLE_NAME = properties.get("LANGUAGE_TASKS_TABLE_NAME").data
+MATH_TASKS_TABLE_NAME = properties.get("MATH_TASKS_TABLE_NAME").data
 
 class App:
     def __init__(self):
@@ -30,6 +40,7 @@ class App:
 
         self.restart_state = False
         self.ended = False
+        self.connection = create_connection() 
 
     def prepare_tasks(self):
         manager = TaskManager()
@@ -73,7 +84,6 @@ class App:
 
     def check_answers(self):
         points = 0
-        connection = create_connection() 
         for i in range(len(self.tasks)):
             answer = self.solution_gui[i].get_text()
             correct = 0
@@ -85,13 +95,12 @@ class App:
                 self.solution_gui[i].set_background_color((252, 18, 18))
 
             if self.num == 0: # math tasks
-                update_math_task(connection, self.tasks[i].id, correct)
+                update_math_task(self.connection, self.tasks[i].id, correct)
             if self.num == 1: # language tasks
-                update_language_task(connection, self.tasks[i].id, correct)
+                update_language_task(self.connection, self.tasks[i].id, correct)
 
             self.tasks[i].solve()
             self.tasks_gui[i].set_text(str(self.tasks[i])) 
-        connection.close()
         if points < 9:
             self.restart_state = True
         else:
@@ -103,7 +112,7 @@ class App:
 
     def restart(self):
         if self.ended:
-            self.run = False
+            self.stop()
         elif self.restart_state:
             self.prepare_tasks()
             self.restart_state = False    
@@ -117,7 +126,6 @@ class App:
             task.draw(self.window)
         for solution in self.solution_gui:
             solution.draw(self.window)
-
 
     def start(self):
         self.run = True
@@ -147,3 +155,27 @@ class App:
             self.update()
 
         pygame.quit()
+        self.send_email()
+        self.connection.close()
+
+    def count_accuracy(self):        
+        self.total_occurs_math = count_total_occurs(self.connection, MATH_TASKS_TABLE_NAME)
+        self.total_correct_math = count_total_correct(self.connection, MATH_TASKS_TABLE_NAME)
+
+        self.total_occurs_language = count_total_occurs(self.connection, LANGUAGE_TASKS_TABLE_NAME)
+        self.total_correct_language = count_total_correct(self.connection, LANGUAGE_TASKS_TABLE_NAME)
+
+        self.math_total_accuracy = round(self.total_correct_math / self.total_occurs_math, 2) if self.total_occurs_math > 0 else 0
+        self.language_total_accuracy = round(self.total_correct_language / self.total_occurs_language, 2) if self.total_correct_language > 0 else 0
+    
+    def send_email(self):
+        self.count_accuracy()
+
+        message = f"""
+            Skuteczność w zadaniach z matematyki: {self.total_correct_math}/{self.total_occurs_math} ({self.math_total_accuracy * 100}%) \n
+            Skuteczność w zadaniach z języka angielskiego: {self.total_correct_language}/{self.total_occurs_language} ({self.language_total_accuracy * 100}%)
+            """
+        
+        ms = MailSender()
+        ms.create_mail(message)
+        ms.send_mail()

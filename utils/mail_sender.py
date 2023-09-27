@@ -22,15 +22,14 @@ class MailSender:
         self.email_receiver = EMAIL_RECEIVER
         self.username = USERNAME
 
-    def create_mail(self):
-        subject = "Test"
+    def create_mail(self, message):
+        subject = f"Wyniki użytkownika {self.username}"
         body = f"""
                 <!doctype html>
                 <html lang="pl">
                 <head></head>
                 <body>
-                    <h1> Hello </h1>
-                    <p> Scores of {self.username}</p>
+                    <p>{message}</p>
                 </body>
                 </html>"""
 
