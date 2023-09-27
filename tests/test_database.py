@@ -4,7 +4,8 @@ import os
 from utils.database import (
     create_connection, create_language_task_table, create_math_task_table,
     get_number_of_tables, insert_language_task, insert_math_task,
-    select_data_by_id, select_all_data, update_language_task, update_math_task
+    select_data_by_id, select_all_data, update_language_task, update_math_task,
+    count_total_correct, count_total_occurs
 )
 from utils.data_reader import get_properties
 
@@ -88,3 +89,24 @@ def test_update_data(connect):
 
     assert row[3] == 3
     assert row[4] == 1
+
+def test_count_total_occurs(connect):
+    connection = connect['connection']
+
+    update_math_task(connection, 1, 1)
+    update_math_task(connection, 1, 1)
+    update_math_task(connection, 1, 0)
+
+    num = count_total_occurs(connection, MATH_TASKS_TABLE_NAME)
+
+    assert num == 6
+
+def test_count_total_correct(connect):
+    connection = connect['connection']
+
+    update_language_task(connection, 1, 0)
+    update_language_task(connection, 1, 1)
+
+    num = count_total_correct(connection, LANGUAGE_TASKS_TABLE_NAME)
+
+    assert num == 2

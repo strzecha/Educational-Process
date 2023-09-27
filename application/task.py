@@ -8,7 +8,7 @@ class Task:
         self.correct_num = correct_num
 
     def check(self, solution):
-        return self.solution == solution
+        return str(self.solution) == solution
 
     def get_solution(self):
         return self.solution

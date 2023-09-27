@@ -122,3 +122,23 @@ def select_all_data(connection, table_name):
     rows = get_rows(connection, sql)
 
     return rows
+
+def count_total_occurs(connection, table_name):
+    sql = f"""
+        SELECT SUM(occurs_number)
+        FROM {table_name}
+        """
+    
+    rows = get_rows(connection, sql)
+
+    return int(rows[0][0])
+
+def count_total_correct(connection, table_name):
+    sql = f"""
+        SELECT SUM(correct_number)
+        FROM {table_name}   
+        """
+
+    rows = get_rows(connection, sql)
+
+    return int(rows[0][0])
