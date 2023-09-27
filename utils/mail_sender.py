@@ -23,6 +23,7 @@ class MailSender:
         self.username = USERNAME
 
     def create_mail(self, message):
+        message = message.replace("\n", "<br />")
         subject = f"Wyniki użytkownika {self.username}"
         body = f"""
                 <!doctype html>

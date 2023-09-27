@@ -184,7 +184,7 @@ class App:
         self.count_accuracy()
 
         message = f"""
-            Skuteczność w zadaniach z matematyki: {self.total_correct_math}/{self.total_occurs_math} ({self.math_total_accuracy * 100}%) \n
+            Skuteczność w zadaniach z matematyki: {self.total_correct_math}/{self.total_occurs_math} ({self.math_total_accuracy * 100}%)
             Skuteczność w zadaniach z języka angielskiego: {self.total_correct_language}/{self.total_occurs_language} ({self.language_total_accuracy * 100}%)
             """
         
