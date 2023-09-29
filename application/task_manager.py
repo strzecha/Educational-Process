@@ -3,7 +3,7 @@ import numpy.random as nprand
 
 from application.task import Task
 from utils.data_reader import get_properties
-from utils.database import select_all_data, create_connection
+from utils.database import TaskDatabase
 
 properties = get_properties()
 
@@ -31,13 +31,13 @@ class TaskManager:
         tasks = list()
         self.num = random.randint(0, 1)
 
-        connection = create_connection()
-        if connection:
+        db = TaskDatabase()
+        if db.connection:
             if self.num == 0: # math tasks
-                self.math_tasks = select_all_data(connection, MATH_TASKS_TABLE_NAME)
+                self.math_tasks = db.select_all_data(MATH_TASKS_TABLE_NAME)
             if self.num == 1: # language tasks
-                self.language_tasks = select_all_data(connection, LANGUAGE_TASKS_TABLE_NAME)
-            connection.close()
+                self.language_tasks = db.select_all_data(LANGUAGE_TASKS_TABLE_NAME)
+            db.close()
                 
 
         if self.num == 0:

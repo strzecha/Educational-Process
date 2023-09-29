@@ -6,10 +6,7 @@ from application.task_manager import TaskManager
 from gui.button import Button
 from gui.text import Text
 from gui.text_input import InputText
-from utils.database import (
-    update_language_task, update_math_task, create_connection,
-    count_total_occurs, count_total_correct, create_database
-)
+from utils.database import TaskDatabase, create_database
 from utils.data_reader import get_properties
 from utils.mail_sender import MailSender
 
@@ -44,8 +41,8 @@ class App:
 
         self.restart_state = False
         self.ended = False
-        self.connection_main_db = create_connection(DB_FILE)
-        self.connection_weekly_db = create_connection(WEEK_DB_FILE) 
+        self.main_db = TaskDatabase(DB_FILE)
+        self.weekly_db = TaskDatabase(WEEK_DB_FILE) 
         self.threshold = THRESHOLD
 
     def prepare_tasks(self):
@@ -101,11 +98,11 @@ class App:
                 self.solution_gui[i].set_background_color((252, 18, 18))
 
             if self.num == 0: # math tasks
-                update_math_task(self.connection_main_db, self.tasks[i].id, correct)
-                update_math_task(self.connection_weekly_db, self.tasks[i].id, correct)
+                self.main_db.update_math_task(self.tasks[i].id, correct)
+                self.weekly_db.update_math_task(self.tasks[i].id, correct)
             if self.num == 1: # language tasks
-                update_language_task(self.connection_main_db, self.tasks[i].id, correct)
-                update_language_task(self.connection_weekly_db, self.tasks[i].id, correct)
+                self.main_db.update_language_task(self.tasks[i].id, correct)
+                self.weekly_db.update_language_task(self.tasks[i].id, correct)
 
             self.tasks[i].solve()
             self.tasks_gui[i].set_text(str(self.tasks[i])) 
@@ -147,10 +144,10 @@ class App:
 
             if num_of_week != current_week:
                 self.send_email()
-                self.connection_weekly_db.close()
+                self.weekly_db.close()
                 os.remove(WEEK_DB_FILE)
                 create_database(WEEK_DB_FILE)
-                self.connection_weekly_db = create_connection(WEEK_DB_FILE)
+                self.weekly_db = TaskDatabase(WEEK_DB_FILE)
                 file.seek(0)
                 file.write(str(current_week))
                 file.truncate()
@@ -183,15 +180,15 @@ class App:
             self.update()
 
         pygame.quit()
-        self.connection_main_db.close()
-        self.connection_weekly_db.close()
+        self.main_db.close()
+        self.weekly_db.close()
 
-    def calculate_accuracy(self, connection):        
-        math_occurs_total = count_total_occurs(connection, MATH_TASKS_TABLE_NAME)
-        math_correct_total = count_total_correct(connection, MATH_TASKS_TABLE_NAME)
+    def calculate_accuracy(self, db):        
+        math_occurs_total = db.count_total_occurs(MATH_TASKS_TABLE_NAME)
+        math_correct_total = db.count_total_correct(MATH_TASKS_TABLE_NAME)
 
-        language_occurs_total = count_total_occurs(connection, LANGUAGE_TASKS_TABLE_NAME)
-        language_correct_total = count_total_correct(connection, LANGUAGE_TASKS_TABLE_NAME)
+        language_occurs_total = db.count_total_occurs(LANGUAGE_TASKS_TABLE_NAME)
+        language_correct_total = db.count_total_correct(LANGUAGE_TASKS_TABLE_NAME)
 
         math_accuracy_total = round(math_correct_total / math_occurs_total, 4) if math_occurs_total > 0 else 0
         language_accuracy_total = round(language_correct_total / language_occurs_total, 4) if language_correct_total > 0 else 0
@@ -203,11 +200,11 @@ class App:
         (
             self.math_occurs_total, self.math_correct_total, self.math_accuracy_total, 
             self.language_occurs_total, self.language_correct_total, self.language_accuracy_total
-        ) = self.calculate_accuracy(self.connection_main_db)
+        ) = self.calculate_accuracy(self.main_db)
         (
             self.math_occurs_week, self.math_correct_week, self.math_accuracy_week, 
             self.language_occurs_week, self.language_correct_week, self.language_accuracy_week
-        ) = self.calculate_accuracy(self.connection_weekly_db)
+        ) = self.calculate_accuracy(self.weekly_db)
     
     def check_if_sent_sunday(self):
         return os.path.exists("sunday")

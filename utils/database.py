@@ -68,39 +68,22 @@ FOREING_WORDS = {
         "koń": "horse"
     }
 
-def create_database(db_file=DB_FILE):
-    connection = create_connection(db_file)
-    if connection:
-        create_language_task_table(connection)
+class TaskDatabase:
+    def __init__(self, db_file=DB_FILE):
+        self.db_file = db_file
+        self.connection = None
 
-        for key in FOREING_WORDS.keys():
-            id = insert_language_task(connection, [key, FOREING_WORDS[key]])
-        rows = select_all_data(connection, LANGUAGE_TASKS_TABLE_NAME)
-        for row in rows:
-            print(row)
-        
-        create_math_task_table(connection)
-        for operator in OPERATORS:
-            id = insert_math_task(connection, operator)
-        rows = select_all_data(connection, MATH_TASKS_TABLE_NAME)
-        for row in rows:
-            print(row)
+        self.create_connection()
 
-        connection.close()
+    def create_connection(self):
+        """ create a database connection to a SQLite database """
+        try:
+            self.connection = sqlite3.connect(self.db_file)
+        except Error as e:
+            print(e)
 
-
-def create_connection(db_file=DB_FILE):
-    """ create a database connection to a SQLite database """
-    connection = None
-    try:
-        connection = sqlite3.connect(db_file)
-    except Error as e:
-        print(e)
-
-    return connection
-
-def create_math_task_table(connection):
-    sql = f"""
+    def create_math_task_table(self):
+        sql = f"""
             CREATE TABLE IF NOT EXISTS {MATH_TASKS_TABLE_NAME} (
                 id integer PRIMARY KEY,
                 operator text NOT NULL,
@@ -108,117 +91,141 @@ def create_math_task_table(connection):
                 correct_number integer DEFAULT 0
             );
         """
-    try:
-        c = connection.cursor()
-        c.execute(sql)
-    except Error as e:
-        print(e)
+        try:
+            c = self.connection.cursor()
+            c.execute(sql)
+        except Error as e:
+            print(e)
 
-def create_language_task_table(connection):
-    sql = f"""
-            CREATE TABLE IF NOT EXISTS {LANGUAGE_TASKS_TABLE_NAME} (
-                id integer PRIMARY KEY,
-                word text NOT NULL,
-                translation text NOT NULL,
-                occurs_number integer DEFAULT 0,
-                correct_number integer DEFAULT 0
-            );
-        """
-    try:
-        c = connection.cursor()
-        c.execute(sql)
-    except Error as e:
-        print(e)
+    def create_language_task_table(self):
+        sql = f"""
+                CREATE TABLE IF NOT EXISTS {LANGUAGE_TASKS_TABLE_NAME} (
+                    id integer PRIMARY KEY,
+                    word text NOT NULL,
+                    translation text NOT NULL,
+                    occurs_number integer DEFAULT 0,
+                    correct_number integer DEFAULT 0
+                );
+            """
+        try:
+            c = self.connection.cursor()
+            c.execute(sql)
+        except Error as e:
+            print(e)
 
-def update_language_task(connection, id, correct):
-    row = select_data_by_id(connection, LANGUAGE_TASKS_TABLE_NAME, id)
+    def update_language_task(self, id, correct):
+        row = self.select_data_by_id(LANGUAGE_TASKS_TABLE_NAME, id)
 
-    sql = f''' UPDATE {LANGUAGE_TASKS_TABLE_NAME}
-              SET occurs_number = ? ,
-                  correct_number = ?
-              WHERE id = {id}'''
-    data = [row[3] + 1, row[4] + correct]
+        sql = f''' UPDATE {LANGUAGE_TASKS_TABLE_NAME}
+                SET occurs_number = ? ,
+                    correct_number = ?
+                WHERE id = {id}'''
+        data = [row[3] + 1, row[4] + correct]
 
-    do_query(connection, sql, data)
+        self.do_query(sql, data)
 
-def update_math_task(connection, id, correct):
-    row = select_data_by_id(connection, MATH_TASKS_TABLE_NAME, id)
+    def update_math_task(self, id, correct):
+        row = self.select_data_by_id(MATH_TASKS_TABLE_NAME, id)
 
-    sql = f''' UPDATE {MATH_TASKS_TABLE_NAME}
-              SET occurs_number = ? ,
-                  correct_number = ?
-              WHERE id = {id}'''
-    data = [row[2] + 1, row[3] + correct]
+        sql = f''' UPDATE {MATH_TASKS_TABLE_NAME}
+                SET occurs_number = ? ,
+                    correct_number = ?
+                WHERE id = {id}'''
+        data = [row[2] + 1, row[3] + correct]
 
-    do_query(connection, sql, data)
+        self.do_query(sql, data)
 
-def do_query(connection, sql, data):
-    cur = connection.cursor()
-    cur.execute(sql, data)
-    connection.commit()
+    def do_query(self, sql, data):
+        cur = self.connection.cursor()
+        cur.execute(sql, data)
+        self.connection.commit()
 
-    return cur.lastrowid
+        return cur.lastrowid
 
-def get_rows(connection, sql):
-    cur = connection.cursor()
-    cur.execute(sql)
-    rows = cur.fetchall()
+    def get_rows(self, sql):
+        cur = self.connection.cursor()
+        cur.execute(sql)
+        rows = cur.fetchall()
 
-    return rows
+        return rows
 
-def insert_language_task(connection, data):
-    sql = f"INSERT INTO {LANGUAGE_TASKS_TABLE_NAME}(word, translation) VALUES(?,?)"
-    
-    last_id = do_query(connection, sql, data)
-    return last_id
+    def insert_language_task(self, data):
+        sql = f"INSERT INTO {LANGUAGE_TASKS_TABLE_NAME}(word, translation) VALUES(?,?)"
+        
+        last_id = self.do_query(sql, data)
+        return last_id
 
-def insert_math_task(connection, data):
-    sql = f"INSERT INTO {MATH_TASKS_TABLE_NAME}(operator) VALUES(?)"
+    def insert_math_task(self, data):
+        sql = f"INSERT INTO {MATH_TASKS_TABLE_NAME}(operator) VALUES(?)"
 
-    last_id = do_query(connection, sql, data)
-    return last_id
+        last_id = self.do_query(sql, data)
+        return last_id
 
-def select_data_by_id(connection, table_name, id):
-    sql = f"SELECT * FROM {table_name} WHERE id = {id}"
+    def select_data_by_id(self, table_name, id):
+        sql = f"SELECT * FROM {table_name} WHERE id = {id}"
 
-    rows = get_rows(connection, sql)
+        rows = self.get_rows(sql)
 
-    return rows[0]
+        return rows[0]
 
-def get_number_of_tables(connection):
-    sql = """
-        SELECT count(*) 
-        FROM sqlite_master 
-        WHERE type = 'table' AND name != 'android_metadata' AND name != 'sqlite_sequence'
-    """
-
-    rows = get_rows(connection, sql)
-
-    return rows[0]
-
-def select_all_data(connection, table_name):
-    sql = f"SELECT * FROM {table_name}"
-
-    rows = get_rows(connection, sql)
-
-    return rows
-
-def count_total_occurs(connection, table_name):
-    sql = f"""
-        SELECT SUM(occurs_number)
-        FROM {table_name}
-        """
-    
-    rows = get_rows(connection, sql)
-
-    return int(rows[0][0])
-
-def count_total_correct(connection, table_name):
-    sql = f"""
-        SELECT SUM(correct_number)
-        FROM {table_name}   
+    def get_number_of_tables(self):
+        sql = """
+            SELECT count(*) 
+            FROM sqlite_master 
+            WHERE type = 'table' AND name != 'android_metadata' AND name != 'sqlite_sequence'
         """
 
-    rows = get_rows(connection, sql)
+        rows = self.get_rows(sql)
 
-    return int(rows[0][0])
+        return rows[0]
+
+    def select_all_data(self, table_name):
+        sql = f"SELECT * FROM {table_name}"
+
+        rows = self.get_rows(sql)
+
+        return rows
+
+    def count_total_occurs(self, table_name):
+        sql = f"""
+            SELECT SUM(occurs_number)
+            FROM {table_name}
+            """
+        
+        rows = self.get_rows(sql)
+
+        return int(rows[0][0])
+
+    def count_total_correct(self, table_name):
+        sql = f"""
+            SELECT SUM(correct_number)
+            FROM {table_name}   
+            """
+
+        rows = self.get_rows(sql)
+
+        return int(rows[0][0])
+
+    def close(self):
+        self.connection.close()
+
+
+def create_database(db_file=DB_FILE):
+    db = TaskDatabase(db_file)
+    if db.connection:
+        db.create_language_task_table()
+
+        for key in FOREING_WORDS.keys():
+            id = db.insert_language_task([key, FOREING_WORDS[key]])
+        rows = db.select_all_data(LANGUAGE_TASKS_TABLE_NAME)
+        for row in rows:
+            print(row)
+        
+        db.create_math_task_table()
+        for operator in OPERATORS:
+            id = db.insert_math_task(operator)
+        rows = db.select_all_data(MATH_TASKS_TABLE_NAME)
+        for row in rows:
+            print(row)
+
+        db.close()
