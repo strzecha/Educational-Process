@@ -1,7 +1,7 @@
 import sqlite3
 from sqlite3 import Error
 
-from utils.data_reader import get_properties
+from utils.data_reader import get_properties, read_data_words_from_file
 
 properties = get_properties()
 
@@ -10,63 +10,7 @@ LANGUAGE_TASKS_TABLE_NAME = properties.get("LANGUAGE_TASKS_TABLE_NAME").data
 MATH_TASKS_TABLE_NAME = properties.get("MATH_TASKS_TABLE_NAME").data
 
 OPERATORS = properties.get("MATH_OPERATORS").data.split(",")
-FOREING_WORDS = {
-        "kotwica": "anchor",
-        "pies": "dog",
-        "kot": "cat",
-        "kropla": "drop",
-        "pytanie": "question",
-        "wykrzyknienie": "exclamation",
-        "cel": "target",
-        "znak": "sign",
-        "ogień": "fire",
-        "słońce": "sun",
-        "księżyc": "moon",
-        "kaktus": "cactus",
-        "igloo": "igloo",
-        "ptak": "bird",
-        "kłódka": "padlock",
-        "ołówek": "pencil",
-        "wargi": "lips",
-        "czaszka": "skull",
-        "żarówka": "light bulb",
-        "ser": "cheese",
-        "pająk": "spider",
-        "pajęczyna": "spider's web",
-        "kostka lodu": "ice cube",
-        "zielony": "green", 
-        "drzewo": "tree", 
-        "marchewka": "carrot",
-        "serce": "heart",
-        "klaun": "clown",
-        "zebra": "zebra",
-        "dinozaur": "dinosaur",
-        "żółw": "turtle",
-        "klucz wiolinowy": "clef",
-        "klucz": "key",
-        "zegar": "clock",
-        "samochód": "car",
-        "człowiek": "person",
-        "delfin": "dolphin",
-        "śnieżynka": "snowflake",
-        "bałwan": "snowman",
-        "jabłko": "apple",
-        "duch": "ghost",
-        "okulary": "glasses",
-        "smok": "dragon",
-        "oko": "eye",
-        "nożyczki": "scissors",
-        "bomba": "bomb",
-        "biedronka": "ladybug",
-        "piorun": "bolt",
-        "liść": "leaf",
-        "butelka": "bottle",
-        "świeca": "candle",
-        "młotek": "hammer",
-        "kwiat": "flower",
-        "koniczyna": "clover",
-        "koń": "horse"
-    }
+WORDS_FILES = properties.get("WORDS_FILES").data.split(",")
 
 class TaskDatabase:
     def __init__(self, db_file=DB_FILE):
@@ -215,17 +159,13 @@ def create_database(db_file=DB_FILE):
     if db.connection:
         db.create_language_task_table()
 
-        for key in FOREING_WORDS.keys():
-            id = db.insert_language_task([key, FOREING_WORDS[key]])
-        rows = db.select_all_data(LANGUAGE_TASKS_TABLE_NAME)
-        for row in rows:
-            print(row)
+        for filename in WORDS_FILES:
+            data = read_data_words_from_file(filename)
+            for row in data:
+                db.insert_language_task([row["word"], row["translation"]])
         
         db.create_math_task_table()
         for operator in OPERATORS:
             id = db.insert_math_task(operator)
-        rows = db.select_all_data(MATH_TASKS_TABLE_NAME)
-        for row in rows:
-            print(row)
 
         db.close()
