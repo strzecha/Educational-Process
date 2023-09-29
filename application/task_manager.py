@@ -55,10 +55,14 @@ class TaskManager:
 
             prob_total += prob
 
+        print()
+
         for task in (self.math_tasks + self.language_tasks):
             prob = task.get_probability()
             prob /= prob_total
             task.set_probability(prob)
+
+        print()
 
     def generate_tasks(self):
         self.prepare_tasks()
@@ -77,7 +81,9 @@ class TaskManager:
         return self.num
 
     def generate_math_tasks(self):
-        tasks_templates = nprand.choice(self.math_tasks, size=self.number_of_tasks, replace=True)
+        probs = [task.get_probability() for task in self.math_tasks]
+        probabilities = [p / sum(probs) for p in probs]
+        tasks_templates = nprand.choice(self.math_tasks, size=self.number_of_tasks, replace=True, p=probabilities)
         tasks = list()
         for task_template in tasks_templates:
             if task_template.operator == "+":
@@ -105,5 +111,7 @@ class TaskManager:
         return tasks
 
     def generate_foreign_language_tasks(self):
-        tasks = nprand.choice(self.language_tasks, size=self.number_of_tasks, replace=False)
+        probs = [task.get_probability() for task in self.language_tasks_tasks]
+        probabilities = [p / sum(probs) for p in probs]
+        tasks = nprand.choice(self.language_tasks, size=self.number_of_tasks, replace=False, p=probabilities)
         return tasks
