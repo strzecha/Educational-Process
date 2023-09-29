@@ -2,6 +2,7 @@ import sqlite3
 from sqlite3 import Error
 
 from utils.data_reader import get_properties, read_data_words_from_file
+from application.task import Task, MathTask
 
 properties = get_properties()
 
@@ -129,6 +130,28 @@ class TaskDatabase:
         rows = self.get_rows(sql)
 
         return rows
+    
+    def get_all_math_tasks(self):
+        rows = self.select_all_data(MATH_TASKS_TABLE_NAME)
+
+        tasks = list()
+
+        for row in rows:
+            task = MathTask(*row)
+            tasks.append(task)
+
+        return tasks
+    
+    def get_all_language_tasks(self):
+        rows = self.select_all_data(LANGUAGE_TASKS_TABLE_NAME)
+
+        tasks = list()
+
+        for row in rows:
+            task = Task(*row)
+            tasks.append(task)
+
+        return tasks
 
     def count_total_occurs(self, table_name):
         sql = f"""

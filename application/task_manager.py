@@ -1,5 +1,6 @@
 import random
 import numpy.random as nprand
+from copy import deepcopy
 
 from application.task import Task
 from utils.data_reader import get_properties
@@ -27,18 +28,43 @@ class TaskManager:
         self.language_tasks = None
         self.number_of_tasks = NUM_TASKS
 
-    def generate_tasks(self):
-        tasks = list()
-        self.num = random.randint(0, 1)
-
+    def prepare_tasks(self):
+        
         db = TaskDatabase()
         if db.connection:
-            if self.num == 0: # math tasks
-                self.math_tasks = db.select_all_data(MATH_TASKS_TABLE_NAME)
-            if self.num == 1: # language tasks
-                self.language_tasks = db.select_all_data(LANGUAGE_TASKS_TABLE_NAME)
+            self.math_tasks = db.get_all_math_tasks()
+            self.language_tasks = db.get_all_language_tasks()
+
             db.close()
-                
+
+        occurs_total = 0
+
+        for task in (self.math_tasks + self.language_tasks):
+            prob = task.get_probability()
+            prob += (task.get_occurs_num() - task.get_correct_num())
+            task.set_probability(prob)
+
+            occurs_total += task.get_occurs_num()
+
+        prob_total = 0
+
+        for task in (self.math_tasks + self.language_tasks):
+            prob = task.get_probability()
+            prob += (occurs_total - task.get_occurs_num())
+            task.set_probability(prob)
+
+            prob_total += prob
+
+        for task in (self.math_tasks + self.language_tasks):
+            prob = task.get_probability()
+            prob /= prob_total
+            task.set_probability(prob)
+
+    def generate_tasks(self):
+        self.prepare_tasks()
+        
+        tasks = list()
+        self.num = random.randint(0, 1)
 
         if self.num == 0:
             tasks = self.generate_math_tasks()
@@ -51,36 +77,33 @@ class TaskManager:
         return self.num
 
     def generate_math_tasks(self):
+        tasks_templates = nprand.choice(self.math_tasks, size=self.number_of_tasks, replace=True)
         tasks = list()
-        for i in range(self.number_of_tasks):
-            operator_id, operator, occurs_num, correct_num = random.choice(self.math_tasks)
-
-            if operator == "+":
+        for task_template in tasks_templates:
+            if task_template.operator == "+":
                 num1 = random.randint(*self.add_range)
                 num2 = random.randint(*self.add_range)
-            elif operator == "-":
+            elif task_template.operator == "-":
                 num1 = random.randint(*self.sub_range)
                 num2 = random.randint(self.sub_range[0], num1)
-            elif operator == "*":
+            elif task_template.operator == "*":
                 num1 = random.randint(*self.mul_range)
                 num2 = random.randint(*self.mul_range)
-            elif operator == "/":
+            elif task_template.operator == "/":
                 num2 = random.randint(*self.div_range)
                 num2 = max(num2, 1)
                 num1 = random.randint(*self.div_range) * num2
             
-            question = f"{num1} {operator} {num2}"
+            question = f"{num1} {task_template.operator} {num2}"
             solution = int(eval(question))
 
-            tasks.append(Task(operator_id, question, solution, occurs_num, correct_num))
+            task = deepcopy(task_template)
+            task.set_question(question)
+            task.set_solution(solution)
+            tasks.append(task)
 
         return tasks
 
     def generate_foreign_language_tasks(self):
-        tasks_id = nprand.choice(range(len(self.language_tasks)), size=self.number_of_tasks, replace=False)
-
-        tasks = list()
-        for id in tasks_id:
-            tasks.append(Task(*self.language_tasks[id]))
-
+        tasks = nprand.choice(self.language_tasks, size=self.number_of_tasks, replace=False)
         return tasks

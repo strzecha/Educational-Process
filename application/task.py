@@ -6,6 +6,19 @@ class Task:
         self.answer = ""
         self.occurs_num = occurs_num
         self.correct_num = correct_num
+        self.probability = 0
+
+    def get_occurs_num(self):
+        return self.occurs_num
+    
+    def get_correct_num(self):
+        return self.correct_num
+
+    def get_probability(self):
+        return self.probability
+
+    def set_probability(self, prob):
+        self.probability = prob
 
     def check(self, solution):
         return str(self.solution) == solution
@@ -21,3 +34,14 @@ class Task:
     
     def __str__(self):
         return "{} = {}".format(self.question, self.answer)
+
+class MathTask(Task):
+    def __init__(self, id, operator, occurs_num, correct_num):
+        super().__init__(id, None, None, occurs_num, correct_num)
+        self.operator = operator
+
+    def set_question(self, question):
+        self.question = question
+
+    def set_solution(self, solution):
+        self.solution = solution
