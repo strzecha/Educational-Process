@@ -1,4 +1,3 @@
-from email.message import EmailMessage
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
@@ -16,13 +15,27 @@ EMAIL_RECEIVER = credentials.get("EMAIL_RECEIVER").data
 USERNAME = credentials.get("USERNAME").data
 
 class MailSender:
+    """Calss MailSender
+    
+    Class to send mails with reports
+    """
+
     def __init__(self):
+        """Init method
+        """
+
         self.email_sender = EMAIL_SENDER
         self.email_password = EMAIL_PASSWORD
         self.email_receiver = EMAIL_RECEIVER
         self.username = USERNAME
 
     def create_mail(self, message):
+        """Method to create mail
+        
+        Args:
+            message (str): constents of mail
+        """
+        
         message = message.replace("\n", "<br />")
         subject = f"Wyniki użytkownika {self.username}"
         body = f"""
@@ -44,6 +57,9 @@ class MailSender:
         self.mail.attach(part)
 
     def send_mail(self):
+        """Method to send mail with report
+        """
+
         context = ssl.create_default_context()
 
         with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:

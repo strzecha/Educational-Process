@@ -27,6 +27,7 @@ def read_data_words_from_file(filename):
     Returns:
         list: data from file
     """
+    
     results = list()
     with open(filename, newline='', encoding="utf-8") as csvfile:
         reader = csv.DictReader(csvfile, delimiter=';', fieldnames=["word", "translation"])
