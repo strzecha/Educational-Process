@@ -21,7 +21,7 @@ THRESHOLD = int(properties.get("THRESHOLD").data)
 class App:
     """class App
 
-    Class to representation main processes in programme
+    Class to representation of main processes in programme
     """
 
     def __init__(self):
@@ -161,7 +161,7 @@ class App:
             solution.draw(self.window)
 
     def start(self):
-        """method to start an application
+        """Main method of App
         """
 
         self.run = True
