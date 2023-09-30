@@ -17,8 +17,19 @@ DIV_RANGE = list(int(num) for num in properties.get("DIV_RANGE").data.split(",")
 LANGUAGE_TASKS_TABLE_NAME = properties.get("LANGUAGE_TASKS_TABLE_NAME").data
 MATH_TASKS_TABLE_NAME = properties.get("MATH_TASKS_TABLE_NAME").data
 
+MATH_TASKS = 0
+LANGUAGE_TASKS = 1
+
 class TaskManager:
+    """class TaskManager
+
+    Class to generate and manage tasks in application
+    """
+
     def __init__(self):
+        """Init method
+        """
+
         self.add_range = ADD_RANGE
         self.sub_range = SUB_RANGE
         self.mul_range = MUL_RANGE
@@ -27,8 +38,12 @@ class TaskManager:
         self.language_tasks = None
         self.number_of_tasks = NUM_TASKS
 
-    def prepare_tasks(self):
-        
+        self.tasks_type = None
+
+    def get_tasks_and_set_probability(self):
+        """Method to get tasks from database and set theirs probabilities of occurs
+        """
+
         db = TaskDatabase()
         if db.connection:
             self.math_tasks = db.get_all_math_tasks()
@@ -54,32 +69,42 @@ class TaskManager:
 
             prob_total += prob
 
-        print()
-
         for task in (self.math_tasks + self.language_tasks):
             prob = task.get_probability()
             prob /= prob_total
             task.set_probability(prob)
 
-        print()
-
     def generate_tasks(self):
-        self.prepare_tasks()
+        """Method to randomly generate tasks
+
+        Returns:
+            list: chosen tasks
+        """
+        
+        self.get_tasks_and_set_probability()
         
         tasks = list()
-        self.num = random.randint(0, 1)
+        self.tasks_type = random.randint(0, 1)
 
-        if self.num == 0:
+        if self.tasks_type == MATH_TASKS:
             tasks = self.generate_math_tasks()
-        elif self.num == 1:
+        elif self.tasks_type == LANGUAGE_TASKS:
             tasks = self.generate_foreign_language_tasks()
 
         return tasks
 
-    def get_num(self):
-        return self.num
+    def get_tasks_type(self):
+        """Getter tasks type
+        """
+        return self.tasks_type
 
     def generate_math_tasks(self):
+        """Method to randomly generate math tasks
+
+        Returns:
+            list: chosen tasks
+        """
+
         probs = [task.get_probability() for task in self.math_tasks]
         probabilities = [p / sum(probs) for p in probs]
         tasks_templates = nprand.choice(self.math_tasks, size=self.number_of_tasks, replace=True, p=probabilities)
@@ -110,7 +135,13 @@ class TaskManager:
         return tasks
 
     def generate_foreign_language_tasks(self):
-        probs = [task.get_probability() for task in self.language_tasks_tasks]
+        """Method to randomly generate language tasks
+
+        Returns:
+            list: chosen tasks
+        """
+        
+        probs = [task.get_probability() for task in self.language_tasks]
         probabilities = [p / sum(probs) for p in probs]
         tasks = nprand.choice(self.language_tasks, size=self.number_of_tasks, replace=False, p=probabilities)
         return tasks

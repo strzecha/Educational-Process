@@ -2,7 +2,7 @@ import pygame
 import os
 import datetime
 
-from application.task_manager import TaskManager
+from application.task_manager import TaskManager, MATH_TASKS, LANGUAGE_TASKS
 from gui.button import Button
 from gui.text import Text
 from gui.text_input import InputText
@@ -59,12 +59,12 @@ class App:
 
         manager = TaskManager()
         self.tasks = manager.generate_tasks()
-        self.num = manager.get_num()
+        self.tasks_type = manager.get_tasks_type()
 
         self.tasks_gui = list()
         self.solution_gui = list()
 
-        if self.num == 0: # math tasks
+        if self.tasks_type == MATH_TASKS:
             i = 0
             for task in self.tasks:
                 pos_x = 0.15 * self.screen_width + (i // 5) * 0.35 * self.screen_width
@@ -74,7 +74,7 @@ class App:
                                                     pos_y=pos_y, font_size=self.font_size))
                 i += 1
 
-        elif self.num == 1: # language tasks
+        elif self.tasks_type == LANGUAGE_TASKS:
             i = 0
             for task in self.tasks:
                 pos_x = 0.2 * self.screen_width
@@ -119,10 +119,10 @@ class App:
             else:
                 self.solution_gui[i].set_background_color((252, 18, 18))
 
-            if self.num == 0: # math tasks
+            if self.tasks_type == MATH_TASKS:
                 self.main_db.update_math_task(self.tasks[i].id, correct)
                 self.weekly_db.update_math_task(self.tasks[i].id, correct)
-            if self.num == 1: # language tasks
+            if self.tasks_type == LANGUAGE_TASKS:
                 self.main_db.update_language_task(self.tasks[i].id, correct)
                 self.weekly_db.update_language_task(self.tasks[i].id, correct)
 
