@@ -19,7 +19,15 @@ MATH_TASKS_TABLE_NAME = properties.get("MATH_TASKS_TABLE_NAME").data
 THRESHOLD = int(properties.get("THRESHOLD").data)
 
 class App:
+    """class App
+
+    Class to representation main processes in programme
+    """
+
     def __init__(self):
+        """Init method
+        """
+
         pygame.init()
 
         self.window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
@@ -45,7 +53,10 @@ class App:
         self.weekly_db = TaskDatabase(WEEK_DB_FILE) 
         self.threshold = THRESHOLD
 
-    def prepare_tasks(self):
+    def prepare_tasks_to_display(self):
+        """Method to prepare tasks to display on screen
+        """
+
         manager = TaskManager()
         self.tasks = manager.generate_tasks()
         self.num = manager.get_num()
@@ -53,28 +64,36 @@ class App:
         self.tasks_gui = list()
         self.solution_gui = list()
 
-        if self.num == 0:
+        if self.num == 0: # math tasks
             i = 0
             for task in self.tasks:
                 pos_x = 0.15 * self.screen_width + (i // 5) * 0.35 * self.screen_width
                 pos_y = 0.2 * self.screen_height + ((i % 5)) * 0.12 * self.screen_height
                 self.tasks_gui.append(Text(str(task), (0, 0, 0), pos_x=pos_x, pos_y=pos_y, font_size=self.font_size))
-                self.solution_gui.append(InputText(0.10 * self.screen_width, 0.05 * self.screen_height, pos_x=pos_x+0.20*self.screen_width, pos_y=pos_y, font_size=self.font_size))
+                self.solution_gui.append(InputText(0.10 * self.screen_width, 0.05 * self.screen_height, pos_x=pos_x + 0.20 * self.screen_width,
+                                                    pos_y=pos_y, font_size=self.font_size))
                 i += 1
 
-        elif self.num == 1:
+        elif self.num == 1: # language tasks
             i = 0
             for task in self.tasks:
                 pos_x = 0.2 * self.screen_width
                 pos_y = 0.1 * self.screen_height + i * 0.08 * self.screen_height
                 self.tasks_gui.append(Text(str(task), (0, 0, 0), pos_x=pos_x, pos_y=pos_y, font_size=self.font_size))
-                self.solution_gui.append(InputText(0.2 * self.screen_width, 0.05 * self.screen_height, pos_x=pos_x+0.4*self.screen_width, pos_y=pos_y, font_size=self.font_size))
+                self.solution_gui.append(InputText(0.2 * self.screen_width, 0.05 * self.screen_height, pos_x=pos_x + 0.4 * self.screen_width, 
+                                                   pos_y=pos_y, font_size=self.font_size))
                 i += 1
 
     def stop(self):
+        """Method to stop application
+        """
+
         self.run = False
 
     def update(self):
+        """Method to update display
+        """
+
         if self.restart_state or self.ended:
             self.next_button.update()
         else:
@@ -86,6 +105,9 @@ class App:
         pygame.display.update()
 
     def check_answers(self):
+        """Method to check answers to tasks
+        """
+
         points = 0
         for i in range(len(self.tasks)):
             answer = self.solution_gui[i].get_text()
@@ -116,13 +138,19 @@ class App:
         self.update()
 
     def restart(self):
+        """Method to restart application
+        """
+
         if self.ended:
             self.stop()
         elif self.restart_state:
-            self.prepare_tasks()
+            self.prepare_tasks_to_display()
             self.restart_state = False    
 
     def draw(self):
+        """Method to draw elements of application
+        """
+
         if self.restart_state or self.ended:
             self.next_button.draw(self.window)
         else:
@@ -133,6 +161,9 @@ class App:
             solution.draw(self.window)
 
     def start(self):
+        """method to start an application
+        """
+
         self.run = True
 
         current_date = datetime.datetime.now()
@@ -155,7 +186,7 @@ class App:
             file = open("sent", "w")
             file.write(str(current_week))
 
-        self.prepare_tasks()
+        self.prepare_tasks_to_display()
         while self.run:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -183,7 +214,21 @@ class App:
         self.main_db.close()
         self.weekly_db.close()
 
-    def calculate_accuracy(self, db):        
+    def calculate_accuracy(self, db):   
+        """Method to calculate accuracy of user on tasks from database
+
+        Args:
+            db (TaskDatabase): database with tasks
+
+        Returns:
+            int: total occurs of math tasks
+            int: total correct answers to math tasks
+            float: accuracy of user on math tasks
+            int: total occurs of language tasks
+            int: total correct answers to language tasks
+            float: accuracy of user on language tasks
+        """     
+
         math_occurs_total = db.count_total_occurs(MATH_TASKS_TABLE_NAME)
         math_correct_total = db.count_total_correct(MATH_TASKS_TABLE_NAME)
 
@@ -197,6 +242,8 @@ class App:
                 language_occurs_total, language_correct_total, language_accuracy_total)
     
     def calculate_total_accuracy(self):
+        """Method to calculate total accuracy of user on tasks
+        """
         (
             self.math_occurs_total, self.math_correct_total, self.math_accuracy_total, 
             self.language_occurs_total, self.language_correct_total, self.language_accuracy_total
@@ -206,10 +253,10 @@ class App:
             self.language_occurs_week, self.language_correct_week, self.language_accuracy_week
         ) = self.calculate_accuracy(self.weekly_db)
     
-    def check_if_sent_sunday(self):
-        return os.path.exists("sunday")
-
     def send_email(self):
+        """Method to send an email with report
+        """   
+        
         self.calculate_total_accuracy()
 
         message = f"""

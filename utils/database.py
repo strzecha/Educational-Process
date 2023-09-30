@@ -14,9 +14,9 @@ OPERATORS = properties.get("MATH_OPERATORS").data.split(",")
 WORDS_FILES = properties.get("WORDS_FILES").data.split(",")
 
 class TaskDatabase:
-    """class FileChanger
+    """class TaskDatabase
 
-    Class to change attributes of files (permissions and names)
+    Class to representation of database with tasks
     """
 
     def __init__(self, db_file=DB_FILE):
