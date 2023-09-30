@@ -95,6 +95,9 @@ class TaskManager:
 
     def get_tasks_type(self):
         """Getter tasks type
+
+        Returns:
+            int: type of tasks
         """
         return self.tasks_type
 
@@ -140,7 +143,7 @@ class TaskManager:
         Returns:
             list: chosen tasks
         """
-        
+
         probs = [task.get_probability() for task in self.language_tasks]
         probabilities = [p / sum(probs) for p in probs]
         tasks = nprand.choice(self.language_tasks, size=self.number_of_tasks, replace=False, p=probabilities)
