@@ -1,3 +1,6 @@
+"""Script to generate default database
+"""
+
 from utils.database import create_database
 from utils.data_reader import get_properties
 

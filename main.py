@@ -1,3 +1,6 @@
+"""Main script
+"""
+
 from application.process import Process
 from application.app import App
 from utils.data_reader import get_properties
