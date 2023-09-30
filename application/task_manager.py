@@ -2,7 +2,6 @@ import random
 import numpy.random as nprand
 from copy import deepcopy
 
-from application.task import Task
 from utils.data_reader import get_properties
 from utils.database import TaskDatabase
 

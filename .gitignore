@@ -1,7 +1,6 @@
 **/__pycache__
 .vscode
 .pytest_cache
-utils/email_sender.py
 gmail_pass.txt
 all_tasks.db
 weekly_tasks.db

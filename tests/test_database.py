@@ -27,7 +27,7 @@ def test_create_tables(connect):
     db.create_language_task_table()
     db.create_math_task_table()
 
-    assert db.get_number_of_tables()[0] == 2
+    assert db.get_number_of_tables() == 2
 
 def test_insert_tables(connect):
     db = connect['db']
@@ -55,13 +55,13 @@ def test_select_all_data(connect):
     rows = db.select_all_data(MATH_TASKS_TABLE_NAME)
     assert len(rows) == 2
 
-def test_select_data_by_id(connect):
+def test_get_task_by_id(connect):
     db = connect['db']
 
-    row = db.select_data_by_id(LANGUAGE_TASKS_TABLE_NAME, 2)
+    row = db.get_task_by_id(LANGUAGE_TASKS_TABLE_NAME, 2)
     assert row == (2, "pies", "dog", 0, 0)
 
-    row = db.select_data_by_id(MATH_TASKS_TABLE_NAME, 1)
+    row = db.get_task_by_id(MATH_TASKS_TABLE_NAME, 1)
     assert row == (1, "+", 0, 0)
 
 def test_update_data(connect):
@@ -71,7 +71,7 @@ def test_update_data(connect):
     db.update_math_task(2, 1)
     db.update_math_task(2, 0)
 
-    row = db.select_data_by_id(MATH_TASKS_TABLE_NAME, 2)
+    row = db.get_task_by_id(MATH_TASKS_TABLE_NAME, 2)
 
     assert row[2] == 3
     assert row[3] == 2
@@ -80,7 +80,7 @@ def test_update_data(connect):
     db.update_language_task(1, 1)
     db.update_language_task(1, 0)
 
-    row = db.select_data_by_id(LANGUAGE_TASKS_TABLE_NAME, 1)
+    row = db.get_task_by_id(LANGUAGE_TASKS_TABLE_NAME, 1)
 
     assert row[3] == 3
     assert row[4] == 1
