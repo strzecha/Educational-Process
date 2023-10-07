@@ -15,7 +15,7 @@ EMAIL_RECEIVER = credentials.get("EMAIL_RECEIVER").data
 USERNAME = credentials.get("USERNAME").data
 
 class MailSender:
-    """Calss MailSender
+    """Class MailSender
     
     Class to send mails with reports
     """

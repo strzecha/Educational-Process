@@ -11,6 +11,12 @@ The probability of selecting a task depends on the user's performance on a given
 
 Every week, the app sends an email with a report on the user's performance on database tasks.
 
+## Database
+Before first run, you need to prepare database by typing in terminal:
+```
+python prepare_database.py
+```
+
 ## Run
 To run the program type in terminal:
 ```
