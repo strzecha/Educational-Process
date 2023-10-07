@@ -1,7 +1,25 @@
 import pygame
 
 class Button():
+    """class Button
+
+    Class to representation of button in interface
+    """
+
     def __init__(self, width, height, pos_x, pos_y, text, action, color=(80, 80, 80), hover_color=(35, 35, 35)):
+        """Init method
+
+        Args:
+            width (int): width of button
+            height (int): height of button
+            pos_x (int): x position of button
+            pos_y (int): y position of button
+            text (Text): text on button
+            action (function): function which is run after clicking button
+            color (tuple, optional): color of button. Defaults to (80, 80, 80).
+            hover_color (tuple, optional): hover color of button. Defaults to (35, 35, 35).
+        """
+
         self.color = color
         self.hover_color = hover_color
 
@@ -17,6 +35,12 @@ class Button():
         self.update()
 
     def set_text(self, text):
+        """Text setter
+
+        Args:
+            text (Text): text on button
+        """
+
         self.text = text
         text_width, text_height = text.text_rendered.get_size()
 
@@ -26,10 +50,19 @@ class Button():
         text.set_pos(margin_x, margin_y)
 
     def handle_event(self, event):
+        """Method to handle button clicking
+
+        Args:
+            event (pygame.event): event
+        """
+
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.click()
 
     def update(self):
+        """Update method
+        """
+
         self.mouse = pygame.mouse.get_pos()
 
         if self.rect.left <= self.mouse[0] <= self.rect.right and self.rect.top <= self.mouse[1] <= self.rect.bottom:
@@ -41,9 +74,18 @@ class Button():
             self.image.fill(self.color)
 
     def click(self):
+        """Click method
+        """
+
         if self.rect.collidepoint(self.mouse):
             self.action()
 
     def draw(self, screen):
+        """Method to draw button on interface
+
+        Args:
+            screen (pygame.display): interface
+        """
+        
         screen.blit(self.image, self.rect)
         self.text.draw(screen)
