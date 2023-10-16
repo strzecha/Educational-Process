@@ -69,12 +69,14 @@ class TaskManager:
 
             prob_total += prob
 
+        prob_total = max(prob_total, 1)
+
         for task in (self.math_tasks + self.language_tasks):
             prob = task.get_probability()
             prob /= prob_total
             task.set_probability(prob)
 
-    def generate_tasks(self):
+    def generate_tasks(self, tasks_type=None):
         """Method to randomly generate tasks
 
         Returns:
@@ -84,7 +86,11 @@ class TaskManager:
         self.get_tasks_and_set_probability()
         
         tasks = list()
-        self.tasks_type = random.randint(0, 1)
+
+        if tasks_type is None:
+            self.tasks_type = random.randint(0, 1)
+        else:
+            self.tasks_type = tasks_type
 
         if self.tasks_type == MATH_TASKS:
             tasks = self.generate_math_tasks()
@@ -109,7 +115,10 @@ class TaskManager:
         """
 
         probs = [task.get_probability() for task in self.math_tasks]
-        probabilities = [p / sum(probs) for p in probs]
+        sum_of_probs = 1 if sum(probs) == 0 else sum(probs)
+        probabilities = [p / sum_of_probs for p in probs]
+        if max(probabilities) == 0: # all probabilities are zeros
+            probabilities = [p / len(probs) for p in probs]
         tasks_templates = nprand.choice(self.math_tasks, size=self.number_of_tasks, replace=True, p=probabilities)
         tasks = list()
         for task_template in tasks_templates:
@@ -145,6 +154,9 @@ class TaskManager:
         """
 
         probs = [task.get_probability() for task in self.language_tasks]
-        probabilities = [p / sum(probs) for p in probs]
+        sum_of_probs = 1 if sum(probs) == 0 else sum(probs)
+        probabilities = [p / sum_of_probs for p in probs]
+        if max(probabilities) == 0: # all probabilities are zeros
+            probabilities = [p / len(probs) for p in probs]
         tasks = nprand.choice(self.language_tasks, size=self.number_of_tasks, replace=False, p=probabilities)
         return tasks

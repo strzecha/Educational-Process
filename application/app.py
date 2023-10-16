@@ -53,12 +53,14 @@ class App:
         self.weekly_db = TaskDatabase(WEEK_DB_FILE) 
         self.threshold = THRESHOLD
 
+        self.tasks_type = None
+
     def prepare_tasks_to_display(self):
         """Method to prepare tasks to display on screen
         """
 
         manager = TaskManager()
-        self.tasks = manager.generate_tasks()
+        self.tasks = manager.generate_tasks(self.tasks_type)
         self.tasks_type = manager.get_tasks_type()
 
         self.tasks_gui = list()
