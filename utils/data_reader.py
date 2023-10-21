@@ -1,6 +1,5 @@
 import csv
 import os
-import sys
 
 from jproperties import Properties
 
