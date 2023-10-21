@@ -7,7 +7,7 @@ from gui.button import Button
 from gui.text import Text
 from gui.text_input import InputText
 from utils.database import TaskDatabase, create_database
-from utils.data_reader import get_properties
+from utils.data_reader import get_properties, check_properties
 from utils.mail_sender import MailSender
 
 properties = get_properties()
@@ -27,6 +27,8 @@ class App:
     def __init__(self):
         """Init method
         """
+
+        check_properties()
 
         pygame.init()
 
