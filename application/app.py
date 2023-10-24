@@ -8,7 +8,7 @@ from gui.text import Text
 from gui.text_input import InputText
 from utils.database import (
     update_language_task, update_math_task, create_connection,
-    count_total_occurs, count_total_correct
+    count_total_occurs, count_total_correct, create_database
 )
 from utils.data_reader import get_properties
 from utils.mail_sender import MailSender
@@ -138,6 +138,26 @@ class App:
     def start(self):
         self.run = True
 
+        current_date = datetime.datetime.now()
+        current_week = current_date.isocalendar().week
+
+        if os.path.exists("sent"):
+            file = open("sent", "r+")
+            num_of_week = int(file.readline())
+
+            if num_of_week != current_week:
+                self.send_email()
+                self.connection_weekly_db.close()
+                os.remove(WEEK_DB_FILE)
+                create_database(WEEK_DB_FILE)
+                self.connection_weekly_db = create_connection(WEEK_DB_FILE)
+                file.seek(0)
+                file.write(str(current_week))
+                file.truncate()
+        else:
+            file = open("sent", "w")
+            file.write(str(current_week))
+
         self.prepare_tasks()
         while self.run:
             for event in pygame.event.get():
@@ -163,14 +183,8 @@ class App:
             self.update()
 
         pygame.quit()
-        current_date = datetime.datetime.now()
-        if current_date.weekday() == 6 and not self.check_if_sent_sunday(): # sunday
-            self.send_email()
-            open("sunday", "w")
-        elif current_date.weekday() != 6 and self.check_if_sent_sunday():
-            os.remove("sunday")
-
         self.connection_main_db.close()
+        self.connection_weekly_db.close()
 
     def calculate_accuracy(self, connection):        
         math_occurs_total = count_total_occurs(connection, MATH_TASKS_TABLE_NAME)
@@ -191,20 +205,20 @@ class App:
             self.language_occurs_total, self.language_correct_total, self.language_accuracy_total
         ) = self.calculate_accuracy(self.connection_main_db)
         (
-            self.math_occurs_week, self.math_correct_week, self.math_week_accuracy, 
-            self.language_occurs_week, self.language_correct_week, self.language_week_accuracy
+            self.math_occurs_week, self.math_correct_week, self.math_accuracy_week, 
+            self.language_occurs_week, self.language_correct_week, self.language_accuracy_week
         ) = self.calculate_accuracy(self.connection_weekly_db)
     
     def check_if_sent_sunday(self):
         return os.path.exists("sunday")
 
     def send_email(self):
-        self.calculate_accuracy()
+        self.calculate_total_accuracy()
 
         message = f"""
             Tygodniowe podsumowanie:
-            Skuteczność w zadaniach z matematyki: {self.math_correct_week}/{self.math_occurs_week} ({self.math_accuracy_total * 100}%)
-            Skuteczność w zadaniach z języka angielskiego: {self.language_correct_week}/{self.language_occurs_week} ({self.language_accuracy_total * 100}%)
+            Skuteczność w zadaniach z matematyki: {self.math_correct_week}/{self.math_occurs_week} ({self.math_accuracy_week * 100}%)
+            Skuteczność w zadaniach z języka angielskiego: {self.language_correct_week}/{self.language_occurs_week} ({self.language_accuracy_week * 100}%)
             Całkowite podsumowanie:
             Skuteczność w zadaniach z matematyki: {self.math_correct_total}/{self.math_occurs_total} ({self.math_accuracy_total * 100}%)
             Skuteczność w zadaniach z języka angielskiego: {self.language_correct_total}/{self.language_occurs_total} ({self.language_accuracy_total * 100}%)
