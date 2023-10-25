@@ -6,7 +6,7 @@ class Text:
     Class to representation of text field in interface
     """
 
-    def __init__(self, text, color, hover_color=None, font_name="Corbel", font_size=20, pos_x=0, pos_y=0):
+    def __init__(self, text, color, hover_color=None, font_name="Comic Sans", font_size=20, pos_x=0, pos_y=0):
         """Init method
 
         Args:

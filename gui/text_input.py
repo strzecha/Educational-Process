@@ -25,7 +25,7 @@ class InputText():
         self.rect.y = pos_y
         self.active = False
 
-        self.bg_color = (210, 210, 210)
+        self.bg_color = (240, 240, 240)
         self.bg_color_active = (255, 255, 255)
 
         self.pos = (pos_x, pos_y)

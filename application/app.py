@@ -12,6 +12,7 @@ from utils.mail_sender import MailSender
 
 properties = get_properties()
 
+DEBUG = properties.get("DEBUG").data
 DB_FILE = properties.get("TASKS_DB_NAME").data
 WEEK_DB_FILE = properties.get("TASKS_WEEK_DB_NAME").data
 LANGUAGE_TASKS_TABLE_NAME = properties.get("LANGUAGE_TASKS_TABLE_NAME").data
@@ -31,23 +32,26 @@ class App:
         check_properties()
 
         pygame.init()
+        if DEBUG == "TRUE":
+            self.window = pygame.display.set_mode((600, 400))
+        else:
+            self.window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
-        self.window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        self.BGCOLOG = (200, 200, 200)
+        self.BGCOLOG = (255, 241, 150)
         
         info = pygame.display.Info()
         self.screen_width, self.screen_height = info.current_w, info.current_h
-        self.font_size = int(0.05 * self.screen_height)
+        self.font_size = int(0.03 * self.screen_height)
 
         text = Text("Sprawdź", (0, 0, 0), font_size=self.font_size)
 
         self.check_button = Button(0.2 * self.screen_width, 0.075 * self.screen_height, 0.5 * self.screen_width, 0.9 * self.screen_height, text, 
-                                    self.check_answers, color=(150, 150, 150), hover_color=(100, 100, 100))
+                                    self.check_answers, color=(255, 226, 41), hover_color=(250, 236, 77))
 
         text = Text("Restart", (0, 0, 0), font_size=self.font_size)
 
         self.next_button = Button(0.2 * self.screen_width, 0.075 * self.screen_height, 0.3 * self.screen_width, 0.9 * self.screen_height, text, 
-                                    self.restart, color=(150, 150, 150), hover_color=(100, 100, 100))
+                                    self.restart, color=(255, 226, 41), hover_color=(250, 236, 77))
 
         self.restart_state = False
         self.ended = False
@@ -70,6 +74,7 @@ class App:
 
         if self.tasks_type == MATH_TASKS:
             i = 0
+            self.question = Text("Oblicz:", (0, 0, 0), font_size=self.font_size, pos_x=0.45 * self.screen_width, pos_y=0.03 * self.screen_height)
             for task in self.tasks:
                 pos_x = 0.15 * self.screen_width + (i // 5) * 0.35 * self.screen_width
                 pos_y = 0.2 * self.screen_height + ((i % 5)) * 0.12 * self.screen_height
@@ -80,6 +85,7 @@ class App:
 
         elif self.tasks_type == LANGUAGE_TASKS:
             i = 0
+            self.question = Text("Przetłumacz na język angielski:", (0, 0, 0), font_size=self.font_size, pos_x=0.35 * self.screen_width, pos_y=0.03 * self.screen_height)
             for task in self.tasks:
                 pos_x = 0.2 * self.screen_width
                 pos_y = 0.1 * self.screen_height + i * 0.08 * self.screen_height
@@ -106,6 +112,7 @@ class App:
             solution.update()
         for task in self.tasks_gui:
             task.update()
+        self.question.update()
         pygame.display.update()
 
     def check_answers(self):
@@ -163,6 +170,7 @@ class App:
             task.draw(self.window)
         for solution in self.solution_gui:
             solution.draw(self.window)
+        self.question.draw(self.window)
 
     def start(self):
         """Main method of App
@@ -173,7 +181,7 @@ class App:
         current_date = datetime.datetime.now()
         current_week = current_date.isocalendar().week
 
-        if os.path.exists("sent"):
+        """if os.path.exists("sent"):
             file = open("sent", "r+")
             num_of_week = int(file.readline())
 
@@ -188,7 +196,7 @@ class App:
                 file.truncate()
         else:
             file = open("sent", "w")
-            file.write(str(current_week))
+            file.write(str(current_week))"""
 
         self.prepare_tasks_to_display()
         while self.run:
@@ -197,7 +205,7 @@ class App:
                     self.stop()
 
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
+                    if event.key == pygame.K_ESCAPE and DEBUG == "TRUE":
                         self.stop()
                     if event.key == pygame.K_LSUPER or event.key == pygame.K_RSUPER:
                         os.system("shutdown /s /t 1")
