@@ -156,9 +156,14 @@ class TaskDatabase:
             int: id of inserted task
         """
 
-        sql = f"INSERT INTO {LANGUAGE_TASKS_TABLE_NAME}(word, translation) VALUES(?,?)"
+        sql = f"""INSERT INTO {LANGUAGE_TASKS_TABLE_NAME}(word, translation) 
+                SELECT ?, ?
+                WHERE NOT EXISTS ( SELECT * FROM {LANGUAGE_TASKS_TABLE_NAME} 
+                                    WHERE word = ?
+                                    AND translation = ? );
+                """
         
-        id = self.do_query(sql, data)
+        id = self.do_query(sql, data * 2)
         return id
 
     def insert_math_task(self, data):
