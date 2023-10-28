@@ -44,19 +44,6 @@ class App:
         info = pygame.display.Info()
         self.screen_width, self.screen_height = info.current_w, info.current_h
         self.scale = 10 / NUM_TASKS
-        self.font_size = int(0.03 * self.screen_height * self.scale)
-
-        text = Text("Sprawdź", (0, 0, 0), font_size=self.font_size)
-
-        self.check_button = Button(0.2 * self.screen_width * self.scale, 0.075 * self.screen_height * self.scale, 
-                                   0.5 * self.screen_width, 0.9 * self.screen_height, text, 
-                                    self.check_answers, color=(255, 226, 41), hover_color=(250, 236, 77))
-
-        text = Text("Restart", (0, 0, 0), font_size=self.font_size)
-
-        self.next_button = Button(0.2 * self.screen_width * self.scale, 0.075 * self.screen_height * self.scale, 
-                                  0.3 * self.screen_width, 0.9 * self.screen_height, text, 
-                                    self.restart, color=(255, 226, 41), hover_color=(250, 236, 77))
 
         self.restart_state = False
         self.ended = False
@@ -66,6 +53,25 @@ class App:
 
         self.tasks_type = None
 
+    def prepare_gui(self):
+        if self.tasks_type == MATH_TASKS:
+            self.font_size = int(0.03 * self.screen_height * self.scale * 1.35)
+        else:
+            self.font_size = int(0.03 * self.screen_height * self.scale)
+
+        text = Text("Sprawdź", (0, 0, 0), font_size=self.font_size)
+
+        self.check_button = Button(0.2 * self.screen_width, 0.075 * self.screen_height, 
+                                   0.5 * self.screen_width, 0.9 * self.screen_height, text, 
+                                    self.check_answers, color=(255, 226, 41), hover_color=(250, 236, 77))
+
+        text = Text("Restart", (0, 0, 0), font_size=self.font_size)
+
+        self.next_button = Button(0.2 * self.screen_width, 0.075 * self.screen_height, 
+                                  0.3 * self.screen_width, 0.9 * self.screen_height, text, 
+                                    self.restart, color=(255, 226, 41), hover_color=(250, 236, 77))
+
+
     def prepare_tasks_to_display(self):
         """Method to prepare tasks to display on screen
         """
@@ -73,6 +79,8 @@ class App:
         manager = TaskManager()
         self.tasks = manager.generate_tasks(self.tasks_type)
         self.tasks_type = manager.get_tasks_type()
+
+        self.prepare_gui()
 
         self.tasks_gui = list()
         self.solution_gui = list()
@@ -83,10 +91,10 @@ class App:
                                   pos_y=0.03 * self.screen_height * self.scale)
             divider = math.ceil(NUM_TASKS / 2)
             for task in self.tasks:
-                pos_x = 0.15 * self.screen_width * self.scale + (i // divider) * 0.35 * self.screen_width
-                pos_y = 0.1 * self.screen_height * self.scale + ((i % divider)) * 0.12 * self.screen_height * self.scale
+                pos_x = 0.15 * self.screen_width + (i // divider) * 0.35 * self.screen_width
+                pos_y = 0.1 * self.screen_height * self.scale * 1.35 + ((i % divider)) * 0.12 * self.screen_height * self.scale * 1.35
                 self.tasks_gui.append(Text(str(task), (0, 0, 0), pos_x=pos_x, pos_y=pos_y, font_size=self.font_size))
-                self.solution_gui.append(InputText(0.10 * self.screen_width * self.scale, 0.05 * self.screen_height * self.scale,
+                self.solution_gui.append(InputText(0.10 * self.screen_width * self.scale * 1.35, 0.05 * self.screen_height * self.scale * 1.35,
                                                     pos_x=pos_x + 0.20 * self.screen_width,
                                                     pos_y=pos_y, font_size=self.font_size))
                 i += 1
@@ -97,7 +105,7 @@ class App:
                                  pos_x=0.35 * self.screen_width, pos_y=0.03 * self.screen_height * self.scale)
             for task in self.tasks:
                 pos_x = 0.2 * self.screen_width
-                pos_y = 0.1 * self.screen_height + i * 0.08 * self.screen_height * self.scale
+                pos_y = 0.1 * self.screen_height * self.scale + i * 0.08 * self.screen_height * self.scale
                 self.tasks_gui.append(Text(str(task), (0, 0, 0), pos_x=pos_x, pos_y=pos_y, font_size=self.font_size))
                 self.solution_gui.append(InputText(0.2 * self.screen_width, 0.05 * self.screen_height * self.scale,
                                                     pos_x=pos_x + 0.4 * self.screen_width, 
