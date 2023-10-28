@@ -1,18 +1,20 @@
 import pygame
 import os
 import datetime
+import math
 
 from application.task_manager import TaskManager, MATH_TASKS, LANGUAGE_TASKS
 from gui.button import Button
 from gui.text import Text
 from gui.text_input import InputText
-from utils.database import TaskDatabase, create_database
+from utils.database import TaskDatabase
 from utils.data_reader import get_properties, check_properties
 from utils.mail_sender import MailSender
 
 properties = get_properties()
 
 DEBUG = properties.get("DEBUG").data
+NUM_TASKS = int(properties.get("NUM_TASKS").data)
 DB_FILE = properties.get("TASKS_DB_NAME").data
 WEEK_DB_FILE = properties.get("TASKS_WEEK_DB_NAME").data
 LANGUAGE_TASKS_TABLE_NAME = properties.get("LANGUAGE_TASKS_TABLE_NAME").data
@@ -41,16 +43,19 @@ class App:
         
         info = pygame.display.Info()
         self.screen_width, self.screen_height = info.current_w, info.current_h
-        self.font_size = int(0.03 * self.screen_height)
+        self.scale = 10 / NUM_TASKS
+        self.font_size = int(0.03 * self.screen_height * self.scale)
 
         text = Text("Sprawdź", (0, 0, 0), font_size=self.font_size)
 
-        self.check_button = Button(0.2 * self.screen_width, 0.075 * self.screen_height, 0.5 * self.screen_width, 0.9 * self.screen_height, text, 
+        self.check_button = Button(0.2 * self.screen_width * self.scale, 0.075 * self.screen_height * self.scale, 
+                                   0.5 * self.screen_width, 0.9 * self.screen_height, text, 
                                     self.check_answers, color=(255, 226, 41), hover_color=(250, 236, 77))
 
         text = Text("Restart", (0, 0, 0), font_size=self.font_size)
 
-        self.next_button = Button(0.2 * self.screen_width, 0.075 * self.screen_height, 0.3 * self.screen_width, 0.9 * self.screen_height, text, 
+        self.next_button = Button(0.2 * self.screen_width * self.scale, 0.075 * self.screen_height * self.scale, 
+                                  0.3 * self.screen_width, 0.9 * self.screen_height, text, 
                                     self.restart, color=(255, 226, 41), hover_color=(250, 236, 77))
 
         self.restart_state = False
@@ -74,23 +79,28 @@ class App:
 
         if self.tasks_type == MATH_TASKS:
             i = 0
-            self.question = Text("Oblicz:", (0, 0, 0), font_size=self.font_size, pos_x=0.45 * self.screen_width, pos_y=0.03 * self.screen_height)
+            self.question = Text("Oblicz:", (0, 0, 0), font_size=self.font_size, pos_x=0.45 * self.screen_width,
+                                  pos_y=0.03 * self.screen_height * self.scale)
+            divider = math.ceil(NUM_TASKS / 2)
             for task in self.tasks:
-                pos_x = 0.15 * self.screen_width + (i // 5) * 0.35 * self.screen_width
-                pos_y = 0.2 * self.screen_height + ((i % 5)) * 0.12 * self.screen_height
+                pos_x = 0.15 * self.screen_width * self.scale + (i // divider) * 0.35 * self.screen_width
+                pos_y = 0.1 * self.screen_height * self.scale + ((i % divider)) * 0.12 * self.screen_height * self.scale
                 self.tasks_gui.append(Text(str(task), (0, 0, 0), pos_x=pos_x, pos_y=pos_y, font_size=self.font_size))
-                self.solution_gui.append(InputText(0.10 * self.screen_width, 0.05 * self.screen_height, pos_x=pos_x + 0.20 * self.screen_width,
+                self.solution_gui.append(InputText(0.10 * self.screen_width * self.scale, 0.05 * self.screen_height * self.scale,
+                                                    pos_x=pos_x + 0.20 * self.screen_width,
                                                     pos_y=pos_y, font_size=self.font_size))
                 i += 1
 
         elif self.tasks_type == LANGUAGE_TASKS:
             i = 0
-            self.question = Text("Przetłumacz na język angielski:", (0, 0, 0), font_size=self.font_size, pos_x=0.35 * self.screen_width, pos_y=0.03 * self.screen_height)
+            self.question = Text("Przetłumacz na język angielski:", (0, 0, 0), font_size=self.font_size, 
+                                 pos_x=0.35 * self.screen_width, pos_y=0.03 * self.screen_height * self.scale)
             for task in self.tasks:
                 pos_x = 0.2 * self.screen_width
-                pos_y = 0.1 * self.screen_height + i * 0.08 * self.screen_height
+                pos_y = 0.1 * self.screen_height + i * 0.08 * self.screen_height * self.scale
                 self.tasks_gui.append(Text(str(task), (0, 0, 0), pos_x=pos_x, pos_y=pos_y, font_size=self.font_size))
-                self.solution_gui.append(InputText(0.2 * self.screen_width, 0.05 * self.screen_height, pos_x=pos_x + 0.4 * self.screen_width, 
+                self.solution_gui.append(InputText(0.2 * self.screen_width, 0.05 * self.screen_height * self.scale,
+                                                    pos_x=pos_x + 0.4 * self.screen_width, 
                                                    pos_y=pos_y, font_size=self.font_size))
                 i += 1
 

@@ -118,7 +118,7 @@ class TaskManager:
         sum_of_probs = 1 if sum(probs) == 0 else sum(probs)
         probabilities = [p / sum_of_probs for p in probs]
         if max(probabilities) == 0: # all probabilities are zeros
-            probabilities = [p / len(probs) for p in probs]
+            probabilities = [1 / len(probs) for p in probs]
         tasks_templates = nprand.choice(self.math_tasks, size=self.number_of_tasks, replace=True, p=probabilities)
         tasks = list()
         for task_template in tasks_templates:
@@ -157,6 +157,6 @@ class TaskManager:
         sum_of_probs = 1 if sum(probs) == 0 else sum(probs)
         probabilities = [p / sum_of_probs for p in probs]
         if max(probabilities) == 0: # all probabilities are zeros
-            probabilities = [p / len(probs) for p in probs]
+            probabilities = [1 / len(probs) for p in probs]
         tasks = nprand.choice(self.language_tasks, size=self.number_of_tasks, replace=False, p=probabilities)
         return tasks
