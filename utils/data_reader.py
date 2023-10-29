@@ -7,6 +7,11 @@ class WrongPropertiesError(Exception):
     pass
 
 def check_properties(file_name="properties"):
+    """Function to check correctness of data in propeties file
+
+    Args:
+        file_name (str, optional): name of properties file. Defaults to "properties".
+    """
     configs = get_properties(file_name)
     
     DEBUG = configs.get("DEBUG").data
@@ -40,7 +45,7 @@ def check_properties(file_name="properties"):
     NUM_TASKS = configs.get("NUM_TASKS").data
     try:
         NUM_TASKS = int(NUM_TASKS)
-        if NUM_TASKS <= 0:
+        if NUM_TASKS <= 6 or NUM_TASKS > 45:
             raise WrongPropertiesError("NUM_TASKS")
     except:
         raise WrongPropertiesError("NUM_TASKS")
