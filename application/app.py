@@ -7,7 +7,7 @@ from application.task_manager import TaskManager, MATH_TASKS, LANGUAGE_TASKS
 from gui.button import Button
 from gui.text import Text
 from gui.text_input import InputText
-from utils.database import TaskDatabase
+from utils.database import TaskDatabase, create_database
 from utils.data_reader import get_properties, check_properties
 from utils.mail_sender import MailSender
 
@@ -62,7 +62,13 @@ class App:
             else:
                 self.font_size = int(0.03 * self.screen_height * self.scale * 4)
         else:
-            self.font_size = int(0.03 * self.screen_height * self.scale)
+            if NUM_TASKS <= 10:
+                self.font_size = int(0.03 * self.screen_height * self.scale * 0.7)
+            elif NUM_TASKS <= 30:
+                self.font_size = int(0.03 * self.screen_height * self.scale * 2.25)
+            else:
+                self.font_size = int(0.03 * self.screen_height * self.scale * 3)
+            
 
         text = Text("Sprawdź", (0, 0, 0), font_size=self.font_size)
 
@@ -140,14 +146,47 @@ class App:
 
         elif self.tasks_type == LANGUAGE_TASKS:
             i = 0
+
+            if NUM_TASKS <= 10:
+                cols = 1
+            elif NUM_TASKS <= 30:
+                cols = 2
+            else:
+                cols = 3
+
             self.question = Text("Przetłumacz na język angielski:", (0, 0, 0), font_size=self.font_size, 
                                  pos_x=0.35 * self.screen_width, pos_y=0.03 * self.screen_height * self.scale)
+            divider = math.ceil(NUM_TASKS / cols)
             for task in self.tasks:
-                pos_x = 0.2 * self.screen_width
-                pos_y = 0.1 * self.screen_height * self.scale + i * 0.08 * self.screen_height * self.scale
+                if cols == 1:
+                    pos_x = 0.2 * self.screen_width
+                    pos_y = 0.1 * self.screen_height * self.scale + i * 0.06 * self.screen_height * self.scale
+
+                    pos_x_sol = pos_x + 0.4 * self.screen_width
+
+                    width_sol = 0.2 * self.screen_width
+                    height_sol =  0.05 * self.screen_height * self.scale * 0.7
+                elif cols == 2:
+                    pos_x = 0.1 * self.screen_width + (i // divider) * 0.45 * self.screen_width
+                    pos_y = 0.2 * self.screen_height * self.scale + ((i % divider)) * 0.16 * self.screen_height * self.scale
+
+                    pos_x_sol = pos_x + 0.29 * self.screen_width
+
+                    width_sol = 0.10 * self.screen_width * self.scale * 2.25
+                    height_sol =  0.05 * self.screen_height * self.scale * 2.25
+                else:
+                    pos_x = 0.02 * self.screen_width + (i // divider) * 0.33 * self.screen_width
+                    pos_y = 0.1 * self.screen_height + ((i % divider)) * 0.2 * self.screen_height * self.scale
+
+                    pos_x_sol = pos_x + 0.22 * self.screen_width
+
+                    width_sol = 0.10 * self.screen_width * self.scale * 3
+                    height_sol =  0.05 * self.screen_height * self.scale * 3
+
+                
                 self.tasks_gui.append(Text(str(task), (0, 0, 0), pos_x=pos_x, pos_y=pos_y, font_size=self.font_size))
-                self.solution_gui.append(InputText(0.2 * self.screen_width, 0.05 * self.screen_height * self.scale,
-                                                    pos_x=pos_x + 0.4 * self.screen_width, 
+                self.solution_gui.append(InputText(width_sol, height_sol,
+                                                    pos_x=pos_x_sol, 
                                                    pos_y=pos_y, font_size=self.font_size))
                 i += 1
 
@@ -238,7 +277,7 @@ class App:
         current_date = datetime.datetime.now()
         current_week = current_date.isocalendar().week
 
-        """if os.path.exists("sent"):
+        if os.path.exists("sent"):
             file = open("sent", "r+")
             num_of_week = int(file.readline())
 
@@ -253,7 +292,7 @@ class App:
                 file.truncate()
         else:
             file = open("sent", "w")
-            file.write(str(current_week))"""
+            file.write(str(current_week))
 
         self.prepare_tasks_to_display()
         while self.run:
