@@ -55,7 +55,12 @@ class App:
 
     def prepare_gui(self):
         if self.tasks_type == MATH_TASKS:
-            self.font_size = int(0.03 * self.screen_height * self.scale * 1.35)
+            if NUM_TASKS <= 6:
+                self.font_size = int(0.03 * self.screen_height * self.scale * 0.7)
+            elif NUM_TASKS <= 20:
+                self.font_size = int(0.03 * self.screen_height * self.scale * 1.35)
+            else:
+                self.font_size = int(0.03 * self.screen_height * self.scale * 4)
         else:
             self.font_size = int(0.03 * self.screen_height * self.scale)
 
@@ -89,13 +94,47 @@ class App:
             i = 0
             self.question = Text("Oblicz:", (0, 0, 0), font_size=self.font_size, pos_x=0.45 * self.screen_width,
                                   pos_y=0.03 * self.screen_height * self.scale)
-            divider = math.ceil(NUM_TASKS / 2)
+            
+            if NUM_TASKS <= 6:
+                cols = 1
+            elif NUM_TASKS <= 20:
+                cols = 2
+            else:
+                cols = 3
+
+            divider = math.ceil(NUM_TASKS / cols)
             for task in self.tasks:
-                pos_x = 0.15 * self.screen_width + (i // divider) * 0.35 * self.screen_width
-                pos_y = 0.1 * self.screen_height * self.scale * 1.35 + ((i % divider)) * 0.12 * self.screen_height * self.scale * 1.35
+                if cols == 1:
+                    pos_x = 0.2 * self.screen_width
+                    pos_y = 0.1 * self.screen_height * self.scale + i * 0.06 * self.screen_height * self.scale
+
+                    pos_x_sol = pos_x + 0.4 * self.screen_width
+
+                    width_sol = 0.10 * self.screen_width * self.scale
+                    height_sol =  0.05 * self.screen_height * self.scale * 0.7
+                elif cols == 2:
+                    pos_x = 0.01 * self.screen_width + (i // divider) * 0.5 * self.screen_width
+                    pos_y = 0.1 * self.screen_height * self.scale + ((i % divider)) * 0.15 * self.screen_height * self.scale
+
+                    pos_x_sol = pos_x + 0.29 * self.screen_width
+
+                    width_sol = 0.10 * self.screen_width * self.scale * 1.35
+                    height_sol =  0.05 * self.screen_height * self.scale * 1.35
+                else:
+                    pos_x = 0.1 * self.screen_width + (i // divider) * 0.3 * self.screen_width
+                    pos_y = 0.07 * self.screen_height + ((i % divider)) * 0.18 * self.screen_height * self.scale * 1.35
+
+                    pos_x_sol = pos_x + 0.15 * self.screen_width
+
+                    width_sol = 0.10 * self.screen_width * self.scale * 3
+                    height_sol =  0.05 * self.screen_height * self.scale * 4
+
+
+                
+                
                 self.tasks_gui.append(Text(str(task), (0, 0, 0), pos_x=pos_x, pos_y=pos_y, font_size=self.font_size))
-                self.solution_gui.append(InputText(0.10 * self.screen_width * self.scale * 1.35, 0.05 * self.screen_height * self.scale * 1.35,
-                                                    pos_x=pos_x + 0.20 * self.screen_width,
+                self.solution_gui.append(InputText(width_sol, height_sol,
+                                                    pos_x=pos_x_sol,
                                                     pos_y=pos_y, font_size=self.font_size))
                 i += 1
 
